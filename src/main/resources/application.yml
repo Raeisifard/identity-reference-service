@@ -23,6 +23,7 @@ identity-reference:
   cache:
     l1:
       enabled: true
+      maximum-size: 10000
     redis:
       enabled: false
       key-prefix: identity-ref:v1:
