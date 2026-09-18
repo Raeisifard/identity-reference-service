@@ -1,0 +1,6 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+logging:
+  config: classpath:log4j2-spring.xml
