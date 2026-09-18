@@ -25,5 +25,6 @@ identity-reference:
       enabled: true
     redis:
       enabled: false
+      key-prefix: identity-ref:v1:
   biometric:
     embedding-enabled: false
