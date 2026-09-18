@@ -46,7 +46,7 @@ public final class IdentityAcquisitionService {
         IdentityAcquisitionResult replay = idempotency.get(request.idempotencyKey());
         if (replay != null) return new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.IDEMPOTENT_REPLAY, replay.reference());
 
-        String cacheKey = request.lookupKey().nationalId() + ":" + request.lookupKey().birthDate();
+        String cacheKey = LookupKeyFingerprint.of(request.lookupKey());
         Optional<IdentityReference> cached = l1.get(cacheKey);
         if (cached.isEmpty()) cached = l2.get(cacheKey);
         if (cached.isPresent()) {

@@ -4,6 +4,7 @@ import com.isc.identityreference.cache.l1.CaffeineL1Cache;
 import com.isc.identityreference.cache.redis.RedisL2Cache;
 import com.isc.identityreference.domain.identity.*;
 import com.isc.identityreference.domain.provider.ProviderAuthority;
+import com.isc.identityreference.domain.lifecycle.IdentityLifecycleState;
 import com.isc.identityreference.policy.ProviderPolicy;
 import com.isc.identityreference.policy.ProviderPolicyEngine;
 import com.isc.identityreference.provider.spi.*;
@@ -30,7 +31,7 @@ class IdentityAcquisitionServiceTest {
         assertEquals(IdentityAcquisitionResult.Status.ACQUIRED, result.status());
         assertEquals(IdentityLifecycleState.ACTIVE, result.reference().lifecycleState());
         assertEquals(1, store.values.size());
-        assertTrue(l1.get("ID-1:1815-12-10").isPresent());
+        assertTrue(l1.get(LookupKeyFingerprint.of(key)).isPresent());
     }
 
     @Test void idempotencyReturnsReplay() {
