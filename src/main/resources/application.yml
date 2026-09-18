@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: identity-reference-service
+  profiles:
+    default: local
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+identity-reference:
+  provider:
+    real-integrations-enabled: false
+  cache:
+    l1:
+      enabled: true
+    redis:
+      enabled: false
+  biometric:
+    embedding-enabled: false
