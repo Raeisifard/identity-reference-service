@@ -17,6 +17,9 @@ management:
 identity-reference:
   provider:
     real-integrations-enabled: false
+  persistence:
+    oracle:
+      enabled: false
   cache:
     l1:
       enabled: true
