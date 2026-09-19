@@ -31,7 +31,7 @@ class IdentityApiSecurityTest {
     void lookupRequiresAuthentication() throws Exception {
         mockMvc.perform(post("/api/v1/identity/lookup")
                         .contentType("application/json")
-                        .content("""{"nationalId":"FIXTURE-FOUND-001","birthDate":"1990-01-01","providerId":"mock-national-agency"}"""))
+                        .content("{\"nationalId\":\"FIXTURE-FOUND-001\",\"birthDate\":\"1990-01-01\",\"providerId\":\"mock-national-agency\"}"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -40,7 +40,7 @@ class IdentityApiSecurityTest {
         mockMvc.perform(post("/api/v1/identity/lookup")
                         .with(httpBasic("lookup", "lookup-secret"))
                         .contentType("application/json")
-                        .content("""{"nationalId":"FIXTURE-FOUND-001","birthDate":"1990-01-01","providerId":"mock-national-agency"}"""))
+                        .content("{\"nationalId\":\"FIXTURE-FOUND-001\",\"birthDate\":\"1990-01-01\",\"providerId\":\"mock-national-agency\"}"))
                 .andExpect(status().isOk());
     }
 
