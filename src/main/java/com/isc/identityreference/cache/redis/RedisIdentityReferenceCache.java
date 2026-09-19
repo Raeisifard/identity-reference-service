@@ -24,6 +24,7 @@ public final class RedisIdentityReferenceCache implements RedisL2Cache {
 
     @Override
     public Optional<IdentityReference> get(String lookupKeyHash) {
+        validateLookupKeyHash(lookupKeyHash);
         try {
             String value = redis.opsForValue().get(key(lookupKeyHash));
             if (value == null) return Optional.empty();
@@ -56,8 +57,13 @@ public final class RedisIdentityReferenceCache implements RedisL2Cache {
     }
 
     private String key(String lookupKeyHash) {
-        if (lookupKeyHash == null || lookupKeyHash.isBlank()) throw new IllegalArgumentException("lookupKeyHash must not be blank");
         return keyPrefix + lookupKeyHash;
+    }
+
+    private void validateLookupKeyHash(String lookupKeyHash) {
+        if (lookupKeyHash == null || lookupKeyHash.isBlank()) {
+            throw new IllegalArgumentException("lookupKeyHash must not be blank");
+        }
     }
 
     public record CacheEnvelope(int schemaVersion, IdentityReference reference) {}
