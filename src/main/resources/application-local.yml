@@ -2,5 +2,19 @@ spring:
   config:
     activate:
       on-profile: local
+  data:
+    redis:
+      url: ${IDENTITY_REDIS_URL:redis://localhost:6379}
+      connect-timeout: 2s
+      timeout: 2s
+      database: ${IDENTITY_REDIS_DATABASE:0}
+
 logging:
   config: classpath:log4j2-spring.xml
+
+identity-reference:
+  cache:
+    redis:
+      enabled: true
+      key-prefix: "${IDENTITY_REDIS_KEY_PREFIX:identity-ref:v1:}"
+      entry-ttl: ${IDENTITY_REDIS_ENTRY_TTL:24h}
