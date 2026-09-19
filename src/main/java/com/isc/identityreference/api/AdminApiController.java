@@ -1,5 +1,7 @@
 package com.isc.identityreference.api;
 
+import com.isc.identityreference.observability.IdentityReferenceMetrics;
+
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +13,11 @@ import java.util.UUID;
 @RequestMapping("/api/v1/admin")
 public class AdminApiController {
     private final com.isc.identityreference.provider.IdentityProviderRegistry providers;
+    private final IdentityReferenceMetrics metrics;
 
-    public AdminApiController(com.isc.identityreference.provider.IdentityProviderRegistry providers) {
+    public AdminApiController(com.isc.identityreference.provider.IdentityProviderRegistry providers, IdentityReferenceMetrics metrics) {
         this.providers = providers;
+        this.metrics = metrics;
     }
 
     @PostMapping("/refresh")
@@ -22,6 +26,7 @@ public class AdminApiController {
             return ResponseEntity.accepted().body(new AdminRefreshResponse(
                     "REJECTED", null, "Provider is not available"));
         }
+        metrics.refreshAccepted(request.providerId());
         return ResponseEntity.accepted().body(new AdminRefreshResponse(
                 "QUEUED", UUID.randomUUID().toString(), "Refresh request accepted for the scheduler pipeline"));
     }
