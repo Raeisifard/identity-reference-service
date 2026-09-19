@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("oracle")
 @EnabledIf(
         expression = "#{systemProperties['identity.oracle.smoke'] == 'true'}",
-        loadContext = true
+        loadContext = false
 )
 @SpringBootTest
 @ActiveProfiles("oracle")
