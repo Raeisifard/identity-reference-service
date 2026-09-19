@@ -2,7 +2,7 @@ package com.isc.identityreference.observability;
 
 import com.isc.identityreference.provider.IdentityProviderRegistry;
 import com.isc.identityreference.provider.spi.IdentityProvider;
-import com.isc.identityreference.provider.spi.IdentityProviderDescriptor;
+import com.isc.identityreference.provider.spi.ProviderDescriptor;
 import com.isc.identityreference.provider.spi.ProviderLookupResult;
 import com.isc.identityreference.provider.spi.ProviderLookupStatus;
 import com.isc.identityreference.domain.identity.IdentityLookupKey;
@@ -20,7 +20,7 @@ class ProviderHealthIndicatorTest {
     }
 
     private static final class TestIdentityProvider implements IdentityProvider {
-        public IdentityProviderDescriptor descriptor() { return new IdentityProviderDescriptor("test-provider", "Test Provider", true); }
+        public IdentityProviderDescriptor descriptor() { return new ProviderDescriptor("test-provider", "Test Provider"); }
         public ProviderLookupResult lookup(IdentityLookupKey key) {
             return new ProviderLookupResult("test-provider", ProviderLookupStatus.NOT_FOUND);
         }
