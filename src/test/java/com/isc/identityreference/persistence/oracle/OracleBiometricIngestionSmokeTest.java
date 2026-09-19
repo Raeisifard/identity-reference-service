@@ -47,11 +47,13 @@ class OracleBiometricIngestionSmokeTest {
     private EntityManager entityManager;
 
     @Test
-    void persistsAndReadsModelAwareEmbeddingThroughOracle() {
+    void persistsAndReadsModelAwareEmbeddingThroughOracle() throws Exception {
         String identityReferenceId = UUID.randomUUID().toString();
         String lookupKeyHash = "oracle-smoke-" + UUID.randomUUID();
 
-        IdentityReferenceEntity identity = new IdentityReferenceEntity();
+        var constructor = IdentityReferenceEntity.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        IdentityReferenceEntity identity = constructor.newInstance();
         identity.setId(identityReferenceId);
         identity.setLookupKeyHash(lookupKeyHash);
         identity.setGivenName("Oracle");
