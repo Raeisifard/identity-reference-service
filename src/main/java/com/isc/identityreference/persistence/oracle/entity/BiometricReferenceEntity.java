@@ -17,7 +17,7 @@ public class BiometricReferenceEntity {
     @Column(name="state",length=32,nullable=false) private String state;
     @Lob @Column(name="vector",nullable=false) private byte[] vector;
     @Column(name="created_at",nullable=false) private Instant createdAt;
-    protected BiometricReferenceEntity(){}
+    public BiometricReferenceEntity(){}
     public String getId(){return id;} public void setId(String v){id=v;}
     public String getIdentityReferenceId(){return identityReferenceId;} public void setIdentityReferenceId(String v){identityReferenceId=v;}
     public String getModelId(){return modelId;} public void setModelId(String v){modelId=v;}
