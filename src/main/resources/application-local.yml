@@ -4,10 +4,11 @@ spring:
       on-profile: local
   data:
     redis:
-      url: ${IDENTITY_REDIS_URL:redis://localhost:6379}
-      connect-timeout: 2s
-      timeout: 2s
+      url: ${IDENTITY_REDIS_URL:redis://172.16.88.115:6379}
+      password: ${IDENTITY_REDIS_PASSWORD:StrongRedisPassword}
       database: ${IDENTITY_REDIS_DATABASE:0}
+      timeout: ${IDENTITY_REDIS_TIMEOUT:2s}
+      connect-timeout: 2s
 
 logging:
   config: classpath:log4j2-spring.xml
