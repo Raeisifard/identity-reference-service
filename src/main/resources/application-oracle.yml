@@ -3,9 +3,9 @@ spring:
     activate:
       on-profile: oracle
   datasource:
-    url: ${IDENTITY_ORACLE_URL:jdbc:oracle:thin:@//172.16.88.115:1521:XE}
-    username: ${IDENTITY_ORACLE_USERNAME:oracle}
-    password: ${IDENTITY_ORACLE_PASSWORD:oracle}
+    url: ${IDENTITY_ORACLE_URL:jdbc:oracle:thin:@//172.16.88.115:1521/XEPDB1}
+    username: ${IDENTITY_ORACLE_USERNAME:IDENTITY_APP}
+    password: ${IDENTITY_ORACLE_PASSWORD:ora123}
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     hibernate:
