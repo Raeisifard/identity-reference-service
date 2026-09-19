@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-@EnableConfigurationProperties({ApiSecurityProperties.class, ApiRateLimitProperties.class})
+@EnableConfigurationProperties({ApiSecurityProperties.class, ApiRateLimitProperties.class, com.isc.identityreference.observability.ObservabilityProperties.class})
 public class ApiSecurityConfiguration {
 
     @Bean
