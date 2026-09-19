@@ -2,12 +2,25 @@ spring:
   config:
     activate:
       on-profile: local
+  datasource:
+    url: ${IDENTITY_ORACLE_URL:jdbc:oracle:thin:@//172.16.88.115:1521:XE}
+    username: ${IDENTITY_ORACLE_USERNAME:oracle}
+    password: ${IDENTITY_ORACLE_PASSWORD:oracle}
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
   data:
     redis:
-      url: ${IDENTITY_REDIS_URL:redis://localhost:6379}
-      connect-timeout: 2s
-      timeout: 2s
+      url: ${IDENTITY_REDIS_URL:redis://172.16.88.115:6379}
+      password: ${IDENTITY_REDIS_PASSWORD:StrongRedisPassword}
       database: ${IDENTITY_REDIS_DATABASE:0}
+      timeout: ${IDENTITY_REDIS_TIMEOUT:2s}
+      connect-timeout: 2s
 
 logging:
   config: classpath:log4j2-spring.xml
