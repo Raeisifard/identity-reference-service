@@ -18,6 +18,11 @@ import java.util.List;
 public class ApiSecurityConfiguration {
 
     @Bean
+    ApiRateLimitGuard apiRateLimitGuard(ApiRateLimitProperties properties) {
+        return new ApiRateLimitGuard(properties);
+    }
+
+    @Bean
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, ApiSecurityProperties properties) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
