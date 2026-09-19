@@ -16,11 +16,14 @@ spring:
     locations: classpath:db/migration
   data:
     redis:
-      url: ${IDENTITY_REDIS_URL:redis://172.16.88.115:6379/3}
+      host: ${IDENTITY_REDIS_HOST:172.16.88.115}
+      port: ${IDENTITY_REDIS_PORT:6379}
       password: ${IDENTITY_REDIS_PASSWORD:StrongRedisPassword}
       database: ${IDENTITY_REDIS_DATABASE:3}
       timeout: ${IDENTITY_REDIS_TIMEOUT:2s}
-      connect-timeout: 2s
+      connect-timeout: ${IDENTITY_REDIS_CONNECT_TIMEOUT:2s}
+      repositories:
+        enabled: false
 
 logging:
   config: classpath:log4j2-spring.xml
