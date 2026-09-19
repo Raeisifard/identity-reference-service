@@ -1,5 +1,6 @@
 package com.isc.identityreference.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -13,6 +14,7 @@ public class ApiRateLimitGuard {
     private final Clock clock;
     private final ConcurrentMap<String, Window> windows = new ConcurrentHashMap<>();
 
+    @Autowired
     public ApiRateLimitGuard(ApiRateLimitProperties properties) {
         this(properties, Clock.systemUTC());
     }
