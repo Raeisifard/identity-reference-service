@@ -34,6 +34,8 @@ identity-reference:
       key-prefix: "identity-ref:v1:"
   biometric:
     embedding-enabled: false
+  operational:
+    request-logging-enabled: ${IDENTITY_REQUEST_LOGGING_ENABLED:true}
   api:
     security:
       enabled: false
