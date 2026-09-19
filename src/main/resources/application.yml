@@ -34,3 +34,13 @@ identity-reference:
       key-prefix: "identity-ref:v1:"
   biometric:
     embedding-enabled: false
+  api:
+    security:
+      enabled: false
+      lookup-username: ${IDENTITY_API_LOOKUP_USERNAME:}
+      lookup-password: ${IDENTITY_API_LOOKUP_PASSWORD:}
+      admin-username: ${IDENTITY_API_ADMIN_USERNAME:}
+      admin-password: ${IDENTITY_API_ADMIN_PASSWORD:}
+    rate-limit:
+      enabled: true
+      requests-per-minute: ${IDENTITY_API_RATE_LIMIT_PER_MINUTE:60}
