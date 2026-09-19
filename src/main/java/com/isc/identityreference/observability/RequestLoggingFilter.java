@@ -24,7 +24,9 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         long started = System.nanoTime();
         try { chain.doFilter(request, response); }
-        finally ifEnabled(request, response, started);
+        finally {
+            ifEnabled(request, response, started);
+        }
     }
 
     private void ifEnabled(HttpServletRequest request, HttpServletResponse response, long started) {
