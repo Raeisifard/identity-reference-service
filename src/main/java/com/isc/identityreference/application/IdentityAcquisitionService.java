@@ -8,6 +8,7 @@ import com.isc.identityreference.domain.lifecycle.IdentityLifecycleState;
 import com.isc.identityreference.domain.provider.*;
 import com.isc.identityreference.policy.ProviderPolicy;
 import com.isc.identityreference.policy.ProviderPolicyEngine;
+import com.isc.identityreference.provider.IdentityProviderRegistry;
 import com.isc.identityreference.provider.spi.*;
 import java.time.Instant;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public final class IdentityAcquisitionService {
     private final IdentityReferenceStore store;
-    private final IdentityProvider provider;
+    private final IdentityProviderRegistry providers;
     private final ProviderPolicy policy;
     private final ProviderPolicyEngine policyEngine;
     private final CaffeineL1Cache l1;
@@ -28,8 +29,14 @@ public final class IdentityAcquisitionService {
     public IdentityAcquisitionService(IdentityReferenceStore store, IdentityProvider provider,
                                       ProviderPolicy policy, ProviderPolicyEngine policyEngine,
                                       CaffeineL1Cache l1, RedisL2Cache l2) {
+        this(store, IdentityProviderRegistry.single(provider), policy, policyEngine, l1, l2);
+    }
+
+    public IdentityAcquisitionService(IdentityReferenceStore store, IdentityProviderRegistry providers,
+                                      ProviderPolicy policy, ProviderPolicyEngine policyEngine,
+                                      CaffeineL1Cache l1, RedisL2Cache l2) {
         this.store = Objects.requireNonNull(store, "store");
-        this.provider = Objects.requireNonNull(provider, "provider");
+        this.providers = Objects.requireNonNull(providers, "providers");
         this.policy = Objects.requireNonNull(policy, "policy");
         this.policyEngine = Objects.requireNonNull(policyEngine, "policyEngine");
         this.l1 = Objects.requireNonNull(l1, "l1");
@@ -39,30 +46,40 @@ public final class IdentityAcquisitionService {
     public IdentityAcquisitionResult acquire(IdentityAcquisitionRequest request, Instant now) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(now, "now");
-        if (!policy.enabled() || !provider.descriptor().providerId().equals(request.providerId())) {
+
+        Optional<IdentityProvider> selectedProvider = providers.find(request.providerId());
+        if (!policy.enabled() || !policy.providerId().equals(request.providerId()) || selectedProvider.isEmpty()
+                || !selectedProvider.get().descriptor().providerId().equals(request.providerId())) {
             return new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.FAILED, null);
         }
+        IdentityProvider provider = selectedProvider.get();
 
         IdentityAcquisitionResult replay = idempotency.get(request.idempotencyKey());
-        if (replay != null) return new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.IDEMPOTENT_REPLAY, replay.reference());
+        if (replay != null) {
+            return new IdentityAcquisitionResult(
+                    IdentityAcquisitionResult.Status.IDEMPOTENT_REPLAY, replay.reference());
+        }
 
         String cacheKey = LookupKeyFingerprint.of(request.lookupKey());
         Optional<IdentityReference> cached = l1.get(cacheKey);
         if (cached.isEmpty()) cached = l2.get(cacheKey);
         if (cached.isPresent()) {
-            IdentityAcquisitionResult result = new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, cached.get());
+            IdentityAcquisitionResult result =
+                    new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, cached.get());
             idempotency.putIfAbsent(request.idempotencyKey(), result);
             return result;
         }
 
         ProviderLookupResult result = provider.lookup(request.lookupKey());
         if (result.status() == ProviderLookupStatus.NOT_FOUND) {
-            IdentityAcquisitionResult notFound = new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.NOT_FOUND, null);
+            IdentityAcquisitionResult notFound =
+                    new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.NOT_FOUND, null);
             idempotency.putIfAbsent(request.idempotencyKey(), notFound);
             return notFound;
         }
         if (result.status() != ProviderLookupStatus.FOUND) {
-            IdentityAcquisitionResult failed = new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.FAILED, null);
+            IdentityAcquisitionResult failed =
+                    new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.FAILED, null);
             idempotency.putIfAbsent(request.idempotencyKey(), failed);
             return failed;
         }
@@ -70,14 +87,17 @@ public final class IdentityAcquisitionService {
         IdentityReference existing = store.find(request.lookupKey()).orElse(null);
         if (existing != null && !policyEngine.canOverwrite(policy, existing.providerRecords().isEmpty()
                 ? ProviderAuthority.UNKNOWN : existing.providerRecords().getFirst().authority(), result.authority())) {
-            IdentityAcquisitionResult current = new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, existing);
+            IdentityAcquisitionResult current =
+                    new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, existing);
             idempotency.putIfAbsent(request.idempotencyKey(), current);
             return current;
         }
 
         Freshness freshness = policyEngine.freshnessFrom(policy, result.retrievedAt());
-        ProviderRecord record = new ProviderRecord(result.providerId(), result.providerRecordId(),
-                result.authority(), ProviderRecordState.CURRENT, result.attributes(), freshness, result.retrievedAt());
+        ProviderRecord record = new ProviderRecord(
+                result.providerId(), result.providerRecordId(), result.authority(),
+                ProviderRecordState.CURRENT, result.attributes(), freshness, result.retrievedAt());
+
         IdentityReference reference = new IdentityReference(
                 existing == null ? IdentityReferenceId.newId() : existing.id(),
                 request.lookupKey(), result.attributes(), List.of(record), List.of(),
@@ -87,7 +107,9 @@ public final class IdentityAcquisitionService {
         IdentityReference saved = store.save(reference);
         l1.put(cacheKey, saved);
         l2.put(cacheKey, saved);
-        IdentityAcquisitionResult acquired = new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, saved);
+
+        IdentityAcquisitionResult acquired =
+                new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, saved);
         idempotency.putIfAbsent(request.idempotencyKey(), acquired);
         return acquired;
     }

@@ -10,3 +10,12 @@ spring:
     open-in-view: false
   flyway:
     enabled: false
+
+identity-reference:
+  provider:
+    real-integrations-enabled: false
+    adapters:
+      - type: mock-national-agency
+        provider-id: mock-national-agency
+        display-name: Mock National Agency
+        enabled: true
