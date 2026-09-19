@@ -1,6 +1,6 @@
 package com.isc.identityreference.persistence.oracle;
 
-import com.isc.identityreference.biometric.EmbeddingMetric;
+import com.isc.identityreference.domain.biometric.EmbeddingMetric;
 import com.isc.identityreference.biometric.MockEmbeddingService;
 import com.isc.identityreference.application.BiometricIngestionService;
 import com.isc.identityreference.domain.lifecycle.IdentityLifecycleState;
