@@ -20,5 +20,5 @@ class BiometricIngestionServiceTest {
  }
  private static ProviderPolicy.EmbeddingPolicy embeddingPolicy(boolean enabled,String modelId,String modelVersion,int dimension,EmbeddingMetric metric,boolean normalized){return new ProviderPolicy.EmbeddingPolicy(enabled,modelId,modelVersion,dimension,metric,normalized);}
  private static final class FailingEmbeddingService implements EmbeddingService { public Optional<EmbeddingResult> generate(EmbeddingRequest request){fail("embedding service must not be called when disabled");return Optional.empty();} }
- private static final class RecordingStore implements BiometricReferenceStore { private BiometricReference saved; public Optional<BiometricReference> find(String a,String b,String c,String d){return Optional.empty();} public BiometricReference save(String id,BiometricReference reference){saved=reference;return reference;} }
+ private static final class RecordingStore implements BiometricReferenceStore { private BiometricReference saved; public Optional<BiometricReference> find(String a,String b,String c,String d){return Optional.empty();} public Optional<BiometricReference> findActiveCompatible(String a,String b,String c,int d,EmbeddingMetric e,boolean f){return Optional.empty();} public BiometricReference save(String id,BiometricReference reference){saved=reference;return reference;} }
 }
