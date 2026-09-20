@@ -20,7 +20,14 @@
 18 Integration contract with face-biometric-service
 19 Automated tests and end-to-end validation
 20 Production hardening and security review
-21 Final release gate and architecture audit
+21 Data protection and cryptographic protection
+22 Final release gate and architecture audit
+
+Phase 21 is intentionally late. Data-protection implementation is deferred until the functional architecture, persistence model, provider flows, refresh flows, biometric integration, caching, audit, and operational behavior are complete.
+
+The current `national_id_ciphertext` field must not be treated as actual encryption until Phase 21 is implemented and verified. Do not introduce premature cryptographic assumptions into earlier phases.
+
+Phase 21 must make field-by-field decisions for sensitive data rather than assuming that every field should be encrypted or hashed. In particular, determine whether national ID requires recoverable encryption, a keyed lookup token/HMAC, or both, based on the completed lookup and provider-refresh flows.
 
 Historical prompt filenames for later milestones are retained to avoid destructive renaming; this phase order is the canonical execution order.
 
