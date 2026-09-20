@@ -1,12 +1,14 @@
-# Oracle durable persistence
+# Phase 05 — Oracle durable persistence
 
-Milestone 05 introduces the Oracle persistence boundary and a Flyway migration.
+**Status: DONE, with data-protection caveat**
+
+Phase 05 introduced the Oracle persistence boundary and Flyway migration.
 
 - identity_reference uses a stable internal ID rather than a national ID as the primary key.
-- Lookup uses a lookup_key_hash; raw national ID is not stored as a query column.
-- The national ID payload has a dedicated ciphertext BLOB column for application-level encryption.
-- next_refresh_at is indexed for later policy-driven refresh scheduling.
+- Lookup uses application lookup material rather than a national ID query column.
+- A field named `national_id_ciphertext` exists for the intended protected representation, but the current compatibility implementation must NOT be described as actual encryption.
+- next_refresh_at is indexed for policy-driven refresh scheduling.
 - IdentityReferenceRepository exposes exact lookup and bounded due-refresh retrieval.
-- Oracle persistence is disabled by default in the local profile. The oracle profile activates the datasource, Flyway and JPA validation.
+- Oracle persistence can be enabled through the Oracle profile.
 
-The lookup hash must be a keyed/deterministic application-level digest in production; this milestone does not invent a secret or key-management mechanism. Schema migration is Oracle-specific.
+The final lookup-token/encryption design is intentionally deferred to Phase 21. Existing compatibility data must be treated as temporary/unprotected until that phase is implemented and migrated.
