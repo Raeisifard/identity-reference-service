@@ -39,9 +39,9 @@ identity-reference:
     lease-duration: 30s
     zone: UTC
     stale-while-refresh: true
-    refresh-executor-core-pool-size: 4
-    refresh-executor-max-pool-size: 16
-    refresh-executor-queue-capacity: 1000
+    refresh-executor-core-pool-size: 8
+    refresh-executor-max-pool-size: 64
+    refresh-executor-queue-capacity: 2000
     refresh-executor-thread-name-prefix: identity-refresh-
     providers:
       mock-national-agency:
@@ -50,7 +50,7 @@ identity-reference:
         stale-grace: 12h
         refresh-before-expiry: 6h
         max-requests-per-second: 100
-        max-concurrent-requests: 16
+        max-concurrent-requests: 64
         max-attempts: 2
         initial-backoff: 1s
         max-backoff: 4s
