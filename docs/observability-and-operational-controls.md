@@ -1,4 +1,6 @@
-# Observability and operational controls
+# Phase 13 — Observability and operational controls
+
+**Status: DONE**
 
 Phase 13 adds operational visibility without logging identity, biometric, credential, or provider payload data.
 
@@ -10,15 +12,7 @@ Phase 13 adds operational visibility without logging identity, biometric, creden
 - Log4j2 includes the correlation ID and emits request fields as structured key/value output.
 
 ## Operational controls
-Request logging can be disabled without code changes:
-
-    identity-reference:
-      operational:
-        request-logging-enabled: true
-
-Environment override:
-
-    IDENTITY_REQUEST_LOGGING_ENABLED=false
+Request logging can be disabled without code changes.
 
 Request logs contain method, URI path, HTTP status, duration and correlation ID only. They do not log request bodies, national IDs, birth dates, photographs, embeddings, credentials, or provider responses.
 
