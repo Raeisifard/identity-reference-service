@@ -13,12 +13,15 @@
 11 Provider adapter framework and first mock provider
 12 Secure lookup and administrative APIs
 13 Observability and operational controls
-14 8-million-record scale and performance engineering
-15 Failure handling, idempotency, locking and recovery
-16 Data governance, retention and audit
-17 Integration contract with face-biometric-service
-18 Automated tests and end-to-end validation
-19 Production hardening and security review
-20 Final release gate and architecture audit
+14 Refresh and synchronization engine
+15 8-million-record scale and performance engineering
+16 Failure handling, idempotency, locking and recovery
+17 Data governance, retention and audit
+18 Integration contract with face-biometric-service
+19 Automated tests and end-to-end validation
+20 Production hardening and security review
+21 Final release gate and architecture audit
+
+Historical prompt filenames for later milestones are retained to avoid destructive renaming; this phase order is the canonical execution order.
 
 Run one milestone at a time.

@@ -1,36 +1,17 @@
 # Secure lookup and administrative APIs
 
-Phase 12 adds the first HTTP API boundary for identity lookup and privileged operational commands.
+Phase 12 introduced the API boundary. Phase 14 makes the administrative refresh command executable and targeted.
 
 ## Endpoints
-
 - POST /api/v1/identity/lookup — authenticated lookup using national ID, birth date and provider ID.
-- POST /api/v1/admin/refresh — ADMIN-only refresh command hook. The request contains only the provider ID; it queues an operation ID but does not execute provider refresh itself.
-- GET /api/v1/admin/status — ADMIN-only operational/provider status.
+- POST /api/v1/admin/refresh — targeted refresh for one identity using provider ID, national ID and birth date.
+- GET /api/v1/admin/status — provider status.
 
-The lookup response is deliberately minimized: it never returns national ID, birth date, photos, embeddings or provider payloads. Provider errors are mapped to a generic unavailable response.
+The admin refresh endpoint is intentionally targeted. It does not expose a bulk/full-provider refresh operation.
 
-## Authentication
+The lookup response remains minimized: it does not return national ID, birth date, photos, embeddings or provider payloads.
 
-Spring Security HTTP Basic is used as a replaceable authentication boundary for this milestone. It is disabled by default so existing local startup remains unchanged. Enable it through configuration/environment variables:
+## Refresh behavior
+Targeted refresh uses the same `IdentityReferenceRefreshService` used by automatic and scheduled refresh. Provider retrieval, freshness calculation, persistence and cache update are therefore consistent across all refresh triggers.
 
-IDENTITY_API_LOOKUP_USERNAME
-IDENTITY_API_LOOKUP_PASSWORD
-IDENTITY_API_ADMIN_USERNAME
-IDENTITY_API_ADMIN_PASSWORD
-
-and set identity-reference.api.security.enabled=true.
-
-The lookup principal receives ROLE_LOOKUP; the administrative principal receives ROLE_ADMIN. Real deployments should replace the development credential mechanism with the platform's service authentication/mTLS or token infrastructure.
-
-## Anti-enumeration and rate limiting
-
-The API does not expose lookup material or provider payloads, uses a stable response shape for found/not-found/error outcomes, and never logs sensitive lookup fields. Lookup requests are rate limited per authenticated principal by a bounded in-process hook. A distributed rate limiter should replace this hook before horizontal production deployment.
-
-The admin refresh command targets a provider only; identity lookup fields such as national ID and birth date are intentionally not part of the refresh command because refresh is a provider-level operational action.
-
-The current provider lookup still uses the Phase 11 normalized provider SPI. Durable lookup/cache integration and executable refresh processing remain owned by their existing application/persistence/scheduler boundaries; the admin refresh endpoint is intentionally a command hook rather than a fake refresh implementation.
-
-## Security configuration
-
-API security is disabled by default in the base configuration. No Oracle or Redis local connection settings are changed by this milestone.
+API authentication and the development credential boundary remain unchanged.
