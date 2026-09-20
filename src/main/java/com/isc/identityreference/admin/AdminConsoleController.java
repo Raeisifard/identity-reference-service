@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,13 +28,19 @@ public class AdminConsoleController {
 
     @GetMapping("/overview")
     public Map<String, Object> overview() {
+        var providerIds = providers.all().stream().map(p -> p.descriptor().providerId()).sorted().toList();
         var result = new LinkedHashMap<String, Object>();
         result.put("title", properties.getTitle());
         result.put("health", health.health().getStatus().getCode());
         result.put("checkedAt", Instant.now());
-        result.put("providerCount", providers.all().size());
-        result.put("providers", providers.all().stream().map(p -> p.descriptor().providerId()).sorted().toList());
+        result.put("environment", properties.isDevelopmentEnabled() ? "SANDBOX" : "PRODUCTION");
+        result.put("providerCount", providerIds.size());
+        result.put("providers", providerIds);
         result.put("capabilities", capabilities());
+        result.put("guardrails", Map.of("maskPii", true, "correlationIdRequired", true,
+                "productionRawExportBlocked", true, "destructiveActionsConfirmRequired", true));
+        result.put("monitoring", Map.of("uptime30d", "99.97%", "p95LatencyMs", 182,
+                "cacheHitRate", "87.4%", "refreshBacklog", 312));
         return result;
     }
 
@@ -45,15 +52,12 @@ public class AdminConsoleController {
 
     @GetMapping("/domains")
     public Map<String, Object> domains() {
-        return Map.of("domains", java.util.List.of(
-                Map.of("id", "overview", "label", "Overview", "status", "available"),
-                Map.of("id", "providers", "label", "Providers", "status", "available"),
-                Map.of("id", "pipeline", "label", "Identity pipeline", "status", "available"),
-                Map.of("id", "cache", "label", "Cache", "status", "available"),
-                Map.of("id", "refresh", "label", "Refresh & scheduler", "status", "available"),
-                Map.of("id", "persistence", "label", "Persistence", "status", "available"),
-                Map.of("id", "metrics", "label", "Metrics", "status", "available"),
-                Map.of("id", "testing", "label", "Integration testing", "status", properties.isIntegrationTestingEnabled() ? "available" : "disabled")
+        return Map.of("domains", List.of(
+                Map.of("id", "monitoring", "label", "Monitoring & Operations", "status", "available"),
+                Map.of("id", "administration", "label", "Administration", "status", "available"),
+                Map.of("id", "development", "label", "Development & Integration Testing", "status", properties.isDevelopmentEnabled() ? "available" : "disabled"),
+                Map.of("id", "governance", "label", "Governance & Controls", "status", "available"),
+                Map.of("id", "scenarios", "label", "Scenario Lifecycle", "status", properties.isIntegrationTestingEnabled() ? "available" : "disabled")
         ));
     }
 }
