@@ -13,7 +13,7 @@ public class IdentityReferenceEntity {
  @Column(name="provider_id",length=128) private String providerId; @Column(name="provider_record_id",length=256) private String providerRecordId; @Column(name="provider_authority",length=32) private String providerAuthority; @Column(name="policy_version") private Long policyVersion;
  @Column(name="refresh_status",length=32) private String refreshStatus; @Column(name="refresh_error",length=256) private String refreshError; @Column(name="refresh_retry_count") private Integer refreshRetryCount;
  @Column(name="created_at",nullable=false) private Instant createdAt; @Column(name="updated_at",nullable=false) private Instant updatedAt;
- protected IdentityReferenceEntity(){}
+ protected IdentityReferenceEntity(){}\n\n public static IdentityReferenceEntity newEntity(){return new IdentityReferenceEntity();}
  public String getId(){return id;} public void setId(String v){id=v;} public String getLookupKeyHash(){return lookupKeyHash;} public void setLookupKeyHash(String v){lookupKeyHash=v;}
  public String getGivenName(){return givenName;} public void setGivenName(String v){givenName=v;} public String getFamilyName(){return familyName;} public void setFamilyName(String v){familyName=v;} public String getFatherName(){return fatherName;} public void setFatherName(String v){fatherName=v;}
  public LocalDate getBirthDate(){return birthDate;} public void setBirthDate(LocalDate v){birthDate=v;} public String getGender(){return gender;} public void setGender(String v){gender=v;}
