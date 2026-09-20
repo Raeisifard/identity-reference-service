@@ -55,4 +55,22 @@ class IdentityApiSecurityTest {
         mockMvc.perform(get("/api/v1/admin/status").with(httpBasic("admin", "admin-secret")))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void adminRefreshAcceptsProviderOnlyRequest() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/refresh")
+                        .with(httpBasic("admin", "admin-secret"))
+                        .contentType("application/json")
+                        .content("{\"providerId\":\"mock-national-agency\"}"))
+                .andExpect(status().isAccepted());
+    }
+
+    @Test
+    void adminRefreshRejectsRequestWithoutProviderId() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/refresh")
+                        .with(httpBasic("admin", "admin-secret"))
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
 }
