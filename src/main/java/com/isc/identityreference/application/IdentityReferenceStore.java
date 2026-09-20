@@ -9,5 +9,5 @@ public interface IdentityReferenceStore {
  default int currentRefreshRetryCount(IdentityLookupKey lookupKey){return 0;}
  default void recordRefreshFailure(IdentityLookupKey lookupKey,String providerId,String status,String safeError,int retryCount,Instant nextRefreshAt,Instant updatedAt){}
  default List<IdentityReference> findRetiredBefore(Instant cutoff,int limit){return List.of();}
- default boolean delete(IdentityLookupKey lookupKey){return false;}
+ default boolean delete(IdentityLookupKey lookupKey){return false;} default Long currentPolicyVersion(IdentityLookupKey lookupKey){return null;}
 }
