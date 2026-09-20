@@ -1,4 +1,6 @@
-# Secure lookup and administrative APIs
+# Phase 12 — Secure lookup and administrative APIs
+
+**Status: DONE**
 
 Phase 12 introduced the API boundary. Phase 14 makes the administrative refresh command executable and targeted.
 
@@ -11,7 +13,6 @@ The admin refresh endpoint is intentionally targeted. It does not expose a bulk/
 
 The lookup response remains minimized: it does not return national ID, birth date, photos, embeddings or provider payloads.
 
-## Refresh behavior
-Targeted refresh uses the same `IdentityReferenceRefreshService` used by automatic and scheduled refresh. Provider retrieval, freshness calculation, persistence and cache update are therefore consistent across all refresh triggers.
+Targeted refresh uses the same `IdentityReferenceRefreshService` used by automatic and scheduled refresh. Provider retrieval, freshness calculation, persistence and cache update are therefore consistent across refresh triggers.
 
 API authentication and the development credential boundary remain unchanged.
