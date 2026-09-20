@@ -1,0 +1,3 @@
+package com.isc.identityreference.persistence.oracle;
+import com.isc.identityreference.governance.AuditEventStore; import com.isc.identityreference.persistence.oracle.repository.IdentityAuditEventRepository; import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty; import org.springframework.context.annotation.*;
+@Configuration @ConditionalOnProperty(prefix="identity-reference.persistence.oracle",name="enabled",havingValue="true") public class OracleAuditEventConfiguration { @Bean AuditEventStore auditEventStore(IdentityAuditEventRepository r){return new OracleAuditEventStore(r);} }
