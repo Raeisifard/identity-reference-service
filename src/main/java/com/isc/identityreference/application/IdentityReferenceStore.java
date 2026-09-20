@@ -9,5 +9,10 @@ import java.util.Optional;
 public interface IdentityReferenceStore {
     Optional<IdentityReference> find(IdentityLookupKey lookupKey);
     IdentityReference save(IdentityReference reference);
-    default List<IdentityReference> findDue(Instant now,int limit){return List.of();}
+    default IdentityReference save(IdentityReference reference, Instant nextRefreshAt, long policyVersion) {
+        return save(reference);
+    }
+    default List<IdentityReference> findDue(Instant now, int limit) {
+        return List.of();
+    }
 }
