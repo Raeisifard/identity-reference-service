@@ -1,0 +1,7 @@
+# Import this file only in non-production profiles.
+identity-reference:
+  admin-console:
+    enabled: ${IDENTITY_ADMIN_CONSOLE_ENABLED:false}
+    development-enabled: ${IDENTITY_ADMIN_CONSOLE_DEVELOPMENT_ENABLED:false}
+    integration-testing-enabled: ${IDENTITY_ADMIN_CONSOLE_INTEGRATION_TESTING_ENABLED:false}
+    title: Identity Reference Console
