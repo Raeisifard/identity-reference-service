@@ -24,11 +24,12 @@ spring:
       connect-timeout: ${IDENTITY_REDIS_CONNECT_TIMEOUT:2s}
       repositories:
         enabled: false
-
 logging:
   config: classpath:log4j2-spring.xml
-
 identity-reference:
+  persistence:
+    oracle:
+      enabled: true
   cache:
     redis:
       enabled: true

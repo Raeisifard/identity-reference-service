@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-public interface IdentityReferenceRepository extends JpaRepository<IdentityReferenceEntity, String> {
-    Optional<IdentityReferenceEntity> findByLookupKeyHash(String lookupKeyHash);
-    List<IdentityReferenceEntity> findByNextRefreshAtLessThanEqualOrderByNextRefreshAtAsc(Instant now, Pageable pageable);
+public interface IdentityReferenceRepository extends JpaRepository<IdentityReferenceEntity,String>{
+ Optional<IdentityReferenceEntity> findByLookupKeyHash(String lookupKeyHash);
+ List<IdentityReferenceEntity> findByNextRefreshAtLessThanEqualOrderByNextRefreshAtAsc(Instant now,Pageable pageable);
 }

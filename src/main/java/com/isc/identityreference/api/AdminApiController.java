@@ -1,41 +1,22 @@
 package com.isc.identityreference.api;
 
 import com.isc.identityreference.observability.IdentityReferenceMetrics;
-
+import com.isc.identityreference.domain.identity.IdentityLookupKey;
+import com.isc.identityreference.refresh.IdentityReferenceRefreshService;
+import com.isc.identityreference.refresh.RefreshResult;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.Instant;
 
-import java.util.Set;
-import java.util.UUID;
-
-@RestController
-@RequestMapping("/api/v1/admin")
-public class AdminApiController {
-    private final com.isc.identityreference.provider.IdentityProviderRegistry providers;
-    private final IdentityReferenceMetrics metrics;
-
-    public AdminApiController(com.isc.identityreference.provider.IdentityProviderRegistry providers, IdentityReferenceMetrics metrics) {
-        this.providers = providers;
-        this.metrics = metrics;
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<AdminRefreshResponse> refresh(@Valid @RequestBody AdminRefreshRequest request) {
-        if (providers.find(request.providerId()).isEmpty()) {
-            return ResponseEntity.accepted().body(new AdminRefreshResponse(
-                    "REJECTED", null, "Provider is not available"));
-        }
-        metrics.refreshAccepted(request.providerId());
-        return ResponseEntity.accepted().body(new AdminRefreshResponse(
-                "QUEUED", UUID.randomUUID().toString(), "Refresh request accepted for the scheduler pipeline"));
-    }
-
-    @GetMapping("/status")
-    public ResponseEntity<AdminStatusResponse> status() {
-        return ResponseEntity.ok(new AdminStatusResponse(
-                "UP", providers.all().stream().map(p -> p.descriptor().providerId()).sorted().toList()));
-    }
-
-    public record AdminStatusResponse(String status, java.util.List<String> providers) {}
+@RestController @RequestMapping("/api/v1/admin") public class AdminApiController {
+ private final com.isc.identityreference.provider.IdentityProviderRegistry providers; private final IdentityReferenceMetrics metrics; private final IdentityReferenceRefreshService refresh;
+ public AdminApiController(com.isc.identityreference.provider.IdentityProviderRegistry providers,IdentityReferenceMetrics metrics,IdentityReferenceRefreshService refresh){this.providers=providers;this.metrics=metrics;this.refresh=refresh;}
+ @PostMapping("/refresh") public ResponseEntity<AdminRefreshResponse> refresh(@Valid @RequestBody AdminRefreshRequest request){
+  if(providers.find(request.providerId()).isEmpty()){metrics.refreshOutcome(request.providerId(),"admin","provider-unavailable");return ResponseEntity.accepted().body(new AdminRefreshResponse("REJECTED",null,"Provider is not available"));}
+  metrics.refreshAccepted(request.providerId()); RefreshResult result=refresh.forceRefresh(new IdentityLookupKey(request.nationalId(),request.birthDate()),request.providerId(),Instant.now());
+  return switch(result.status()){case REFRESHED->ResponseEntity.ok(new AdminRefreshResponse("REFRESHED",result.operationId(),result.message()));case NOT_FOUND->ResponseEntity.status(404).body(new AdminRefreshResponse("NOT_FOUND",result.operationId(),result.message()));case LOCKED->ResponseEntity.accepted().body(new AdminRefreshResponse("LOCKED",result.operationId(),result.message()));default->ResponseEntity.status(503).body(new AdminRefreshResponse("FAILED",result.operationId(),result.message()));};
+ }
+ @GetMapping("/status") public ResponseEntity<AdminStatusResponse> status(){return ResponseEntity.ok(new AdminStatusResponse("UP",providers.all().stream().map(p->p.descriptor().providerId()).sorted().toList()));}
+ public record AdminStatusResponse(String status,java.util.List<String> providers){}
 }
