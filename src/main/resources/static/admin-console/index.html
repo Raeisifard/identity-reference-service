@@ -1,1 +1,26 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Identity Reference Console</title><link rel="stylesheet" href="/admin-console/console.css"></head><body><div class="app-shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">IR</div><div><strong>Identity Reference</strong><span>Control console</span></div></div><div class="environment"><span class="dot"></span><span id="environmentLabel">Operational</span><small id="lastChecked">Checking…</small></div><nav id="navigation" aria-label="Console domains"></nav><div class="sidebar-footer"><span class="status-dot"></span><span>Service connected</span></div></aside><main class="content"><header class="topbar"><div><p class="eyebrow">ADMINISTRATION / CONTROL PLANE</p><h1 id="pageTitle">Overview</h1><p class="muted">Monitor identity acquisition, freshness, providers and operational controls.</p></div><div class="top-actions"><button class="icon-button" id="refreshButton" title="Refresh data">↻</button><span class="avatar">AD</span></div></header><section id="notice" class="notice hidden"></section><section id="overviewPanel" class="panel-view"></section><section id="testingPanel" class="panel-view hidden"></section></main></div><script src="/admin-console/console.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Identity Reference Console</title>
+  <link rel="stylesheet" href="/admin-console/console.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="rail-top">
+        <div class="logo">IR</div><div class="wordmark"><b>Identity Reference</b><span>Admin console</span></div>
+      </div>
+      <div class="workspace"><span class="pulse"></span><div><b>Production</b><small>Connected workspace</small></div><span class="chevron">⌄</span></div>
+      <nav id="navigation" aria-label="Console navigation"></nav>
+      <div class="rail-bottom"><button class="rail-link" data-domain="settings">⚙ <span>Settings</span></button><div class="account"><span class="avatar">AD</span><div><b>Administrator</b><small>System operator</small></div><span>•••</span></div></div>
+    </aside>
+    <main class="main">
+      <header class="header"><div><div class="breadcrumbs">CONTROL PLANE <span>/</span> <b id="crumb">OVERVIEW</b></div><h1 id="pageTitle">Overview</h1><p id="pageDescription">A live view of your identity reference service.</p></div><div class="header-actions"><button class="quiet" id="refreshButton">↻ <span>Refresh</span></button><button class="primary" id="quickAction">＋ New action</button></div></header>
+      <div id="notice" class="notice hidden"></div>
+      <div id="app"></div>
+    </main>
+  </div>
+  <script src="/admin-console/console.js"></script>
+</body>
+</html>
