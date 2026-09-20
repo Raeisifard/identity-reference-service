@@ -1,7 +1,11 @@
-# Security and privacy
+# Cross-cutting security and privacy baseline
 
-Treat national identity attributes, photos and biometric vectors as highly sensitive.
+**Status: BASELINE ONLY — not a completion report for Phase 20 or 21**
 
-Production controls include mTLS/service authentication, authorization, Vault secrets, encryption, audit trails, purpose limitation, retention/deletion, provider contractual restrictions, rate limiting, anti-enumeration, response minimization and prohibition of sensitive payloads in logs.
+National identity attributes, photos and biometric vectors are highly sensitive.
 
-Do not assume jurisdiction-specific legal requirements; deployment governance must configure the applicable rules.
+The project baseline requires service authentication/authorization, secret management, response minimization, anti-enumeration, rate limiting, safe logging, auditability, retention controls and provider contractual restrictions.
+
+Final cryptographic protection is intentionally deferred to Phase 21. In particular, the current `national_id_ciphertext` compatibility field must not be described as actual encryption until Phase 21 defines, implements, migrates and verifies the final design.
+
+Do not infer jurisdiction-specific legal compliance from this document; deployment governance must configure the applicable rules.
