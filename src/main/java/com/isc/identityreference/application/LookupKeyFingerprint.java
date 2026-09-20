@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-final class LookupKeyFingerprint {
+public final class LookupKeyFingerprint {
     private LookupKeyFingerprint() {}
 
-    static String of(IdentityLookupKey key) {
+    public static String of(IdentityLookupKey key) {
         try {
             String canonical = key.nationalId() + "|" + key.birthDate();
             byte[] digest = MessageDigest.getInstance("SHA-256")
