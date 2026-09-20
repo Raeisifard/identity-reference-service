@@ -55,4 +55,7 @@ The endpoint returns biometric vectors and is a service-to-service integration e
 
 BiometricReferenceIntegrationServiceTest verifies newest-active selection and exact model-space compatibility.
 
-Full Maven verification was not executable through the GitHub connector in this implementation session; run mvn clean verify locally.
+Source face-biometric-lab contract was analyzed at commit 2df75a07b08820cef21135f37f553b595c60a1aa. Full Maven verification was not executable through the GitHub connector in this implementation session; run mvn clean verify locally.
+
+## Commit
+Final Phase 18 code/test state: 1d6efa1247f0f4d0b28ecc9f543415e0352a9505
