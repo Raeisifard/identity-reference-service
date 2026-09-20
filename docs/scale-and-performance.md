@@ -21,9 +21,9 @@ The scheduler now uses a 10-second cadence and 1000-record batches by default. S
 
 Stale-while-refresh and scheduled refresh use a dedicated bounded executor:
 
-- core threads: 4
-- maximum threads: 16
-- queue capacity: 1000
+- core threads: 8
+- maximum threads: 64
+- queue capacity: 2000
 
 These values are configuration and must be load-tested against provider latency, Oracle capacity, Redis capacity, and deployment instance count.
 
