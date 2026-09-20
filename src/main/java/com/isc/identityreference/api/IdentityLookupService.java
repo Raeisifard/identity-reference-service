@@ -10,7 +10,6 @@ import java.util.UUID;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
-import java.util.Objects;
 
 @Service
 public class IdentityLookupService {
@@ -22,8 +21,14 @@ public class IdentityLookupService {
   RefreshResult result=refresh.getOrRefresh(new IdentityLookupKey(request.nationalId(),request.birthDate()),providerId,Instant.now());
   String outcome=switch(result.status()){case REFRESHED,SKIPPED,STALE_SERVED->"FOUND";case NOT_FOUND->"NOT_FOUND";default->"UNAVAILABLE";};
   metrics.lookup(providerId,outcome); sample.stop(metrics.lookupTimer(providerId));
-  governance.auditLookup(new IdentityLookupKey(request.nationalId(),request.birthDate()),providerId,outcome,result.operationId()==null?null:UUID.fromString(result.operationId()),Instant.now());
+  IdentityLookupKey key=new IdentityLookupKey(request.nationalId(),request.birthDate());
+  governance.auditLookup(key,providerId,outcome,parseOperationId(result.operationId()),Instant.now());
   String message=switch(outcome){case "FOUND"->"Identity match found";case "NOT_FOUND"->"No matching identity was found";default->"Identity lookup is temporarily unavailable";};
   return new IdentityLookupResponse(outcome,providerId,message);
+ }
+ private static UUID parseOperationId(String value){
+  if(value==null||value.isBlank()||"-".equals(value)) return null;
+  try{return UUID.fromString(value);}
+  catch(IllegalArgumentException e){return null;}
  }
 }
