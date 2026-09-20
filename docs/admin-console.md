@@ -1,36 +1,28 @@
-# Phase 15 — Admin console
+# Admin Test Console
 
-The admin console now uses the reference artifact layout as its visual basis: left workspace rail, grouped navigation, compact status cards, activity panel, system-health panel, provider registry, gradient action banner, and responsive views.
+The uploaded DOCX was usable as an implementation template. It defines a four-page console concept:
 
-## UI
+1. Monitoring & Operations
+2. Administration & Development/Test Workbench
+3. Governance, Configuration & Operational Controls
+4. Scenario Lifecycle, Test History & Extensibility Patterns
 
-Open:
+The static console now follows that information architecture with a shared dark lifecycle sidebar, sandbox environment card, production-safety guardrail card, operator identity, sepia/cream content surface, compact metrics, provider/latency monitoring, refresh backlog, capability registry, lifecycle workspaces, locked/proposed states, and masked-data messaging.
 
-```text
-/admin-console/index.html
-```
+## Navigation
 
-Every navigation item has a dedicated rendered workspace, rather than only changing the page heading:
+- Monitoring & Operations
+- Administration
+- Development & Integration Testing
+- Governance & Controls
+- Scenario Lifecycle
 
-- Overview
-- Providers
-- Identity pipeline
-- Cache
-- Refresh & scheduler
-- Persistence
-- Metrics
-- Integration testing
-- Settings
+Each navigation item renders a different content workspace. Disabled modules remain visible as locked items rather than silently disappearing.
 
-## API
+## Safety model
 
-- `GET /api/v1/admin/console/overview`
-- `GET /api/v1/admin/console/capabilities`
-- `GET /api/v1/admin/console/domains`
-- `POST /api/v1/admin/console/testing/smoke`
-
-The UI only displays data already available from the service and clearly labels configuration-backed or illustrative operational summaries. It does not expose identity payloads, credentials, biometric vectors, or provider response bodies.
-
-## Safety
-
-Console and testing flags remain disabled by default. The testing endpoint is conditionally registered only when integration testing is explicitly enabled.
+- Sandbox mode is shown when development is enabled.
+- Production-facing behavior remains read-only and guarded.
+- PII masking and correlation-ID requirements are displayed as enforced controls.
+- Testing endpoints are configuration-gated.
+- The UI does not display raw identity payloads or credentials.
