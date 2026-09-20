@@ -45,9 +45,7 @@ public final class OracleBiometricReferenceStore implements BiometricReferenceSt
                         reference.sourcePhotoVersion())
                 .orElseGet(BiometricReferenceEntity::new);
 
-        if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID().toString());
-        }
+        if (entity.getId() == null) entity.setId(UUID.randomUUID().toString());
         entity.setIdentityReferenceId(identityReferenceId);
         entity.setModelId(reference.modelId());
         entity.setModelVersion(reference.modelVersion());
@@ -62,6 +60,10 @@ public final class OracleBiometricReferenceStore implements BiometricReferenceSt
         return reference;
     }
 
+    public long deleteByIdentityReferenceId(String identityReferenceId) {
+        return repository.deleteByIdentityReferenceId(identityReferenceId);
+    }
+
     private static BiometricReference toDomain(BiometricReferenceEntity e) {
         return new BiometricReference(e.getModelId(), e.getModelVersion(), e.getDimension(),
                 EmbeddingMetric.valueOf(e.getMetric()), e.isNormalized(), e.getSourcePhotoVersion(),
@@ -71,21 +73,16 @@ public final class OracleBiometricReferenceStore implements BiometricReferenceSt
 
     private static byte[] toBytes(float[] vector) {
         ByteBuffer buffer = ByteBuffer.allocate(vector.length * Float.BYTES).order(ByteOrder.BIG_ENDIAN);
-        for (float value : vector) {
-            buffer.putFloat(value);
-        }
+        for (float value : vector) buffer.putFloat(value);
         return buffer.array();
     }
 
     private static float[] fromBytes(byte[] bytes, int dimension) {
-        if (bytes == null || bytes.length != dimension * Float.BYTES) {
+        if (bytes == null || bytes.length != dimension * Float.BYTES)
             throw new IllegalStateException("stored biometric vector has invalid size");
-        }
         ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
         float[] vector = new float[dimension];
-        for (int i = 0; i < dimension; i++) {
-            vector[i] = buffer.getFloat();
-        }
+        for (int i = 0; i < dimension; i++) vector[i] = buffer.getFloat();
         return vector;
     }
 }
