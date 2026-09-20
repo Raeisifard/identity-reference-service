@@ -1,0 +1,3 @@
+package com.isc.identityreference.governance;
+import org.springframework.scheduling.annotation.Scheduled; import org.springframework.stereotype.Component; import java.time.Instant;
+@Component public final class DataGovernanceScheduler { private final DataGovernanceService s; private final GovernanceProperties p; public DataGovernanceScheduler(DataGovernanceService s,GovernanceProperties p){this.s=s;this.p=p;} @Scheduled(fixedDelayString="\${identity-reference.governance.purge-delay:1h}") public void purge(){if(!p.isEnabled())return;Instant n=Instant.now();s.purgeRetired(n,p.getPurgeBatchSize());s.purgeAudit(n,p.getPurgeBatchSize());} }
