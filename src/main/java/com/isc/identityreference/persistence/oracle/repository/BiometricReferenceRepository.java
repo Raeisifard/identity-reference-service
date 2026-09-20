@@ -12,4 +12,6 @@ public interface BiometricReferenceRepository extends JpaRepository<BiometricRef
 
     List<BiometricReferenceEntity> findByIdentityReferenceIdAndModelIdAndModelVersionAndStateOrderByCreatedAtDesc(
             String identityReferenceId, String modelId, String modelVersion, String state);
+
+    long deleteByIdentityReferenceId(String identityReferenceId);
 }
