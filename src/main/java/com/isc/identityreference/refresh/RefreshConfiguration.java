@@ -20,5 +20,5 @@ public class RefreshConfiguration{
   ThreadPoolTaskExecutor e=new ThreadPoolTaskExecutor();e.setCorePoolSize(p.getProviderExecutorCorePoolSize());e.setMaxPoolSize(p.getProviderExecutorMaxPoolSize());e.setQueueCapacity(0);e.setThreadNamePrefix(p.getProviderExecutorThreadNamePrefix());e.setWaitForTasksToCompleteOnShutdown(false);e.initialize();return e;
  }
  @Bean @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix="identity-reference.cache.redis",name="enabled",havingValue="true") @org.springframework.context.annotation.Primary
- RefreshLeaseManager redisRefreshLeaseManager(org.springframework.data.redis.core.StringRedisTemplate redis,@org.springframework.beans.factory.annotation.Value("\${identity-reference.cache.redis.key-prefix:identity-ref:v1:}") String prefix){return new RedisRefreshLeaseManager(redis,prefix+"refresh-lock:");}
+ RefreshLeaseManager redisRefreshLeaseManager(org.springframework.data.redis.core.StringRedisTemplate redis,@org.springframework.beans.factory.annotation.Value("${identity-reference.cache.redis.key-prefix:identity-ref:v1:}") String prefix){return new RedisRefreshLeaseManager(redis,prefix+"refresh-lock:");}
 }
