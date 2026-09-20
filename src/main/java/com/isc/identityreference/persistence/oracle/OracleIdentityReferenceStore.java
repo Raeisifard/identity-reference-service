@@ -18,6 +18,7 @@ public final class OracleIdentityReferenceStore implements IdentityReferenceStor
  private final IdentityReferenceRepository repository; public OracleIdentityReferenceStore(IdentityReferenceRepository repository){this.repository=repository;}
  public Optional<IdentityReference> find(IdentityLookupKey key){return repository.findByLookupKeyHash(LookupKeyFingerprint.of(key)).map(OracleIdentityReferenceStore::toDomain);}
  public List<IdentityReference> findDue(Instant now,int limit){return repository.findByNextRefreshAtLessThanEqualOrderByNextRefreshAtAsc(now,org.springframework.data.domain.PageRequest.of(0,limit)).stream().map(OracleIdentityReferenceStore::toDomain).toList();}
+ public IdentityReference save(IdentityReference r){return save(r,r.freshness().freshUntil().minus(Duration.ofHours(6)),1L);}
  public IdentityReference save(IdentityReference r, Instant nextRefreshAt, long policyVersion){
   var e=repository.findByLookupKeyHash(LookupKeyFingerprint.of(r.lookupKey())).orElseGet(IdentityReferenceEntity::newEntity);
   e.setId(r.id().value().toString()); e.setLookupKeyHash(LookupKeyFingerprint.of(r.lookupKey())); e.setGivenName(r.attributes().givenName()); e.setFamilyName(r.attributes().familyName()); e.setFatherName(r.attributes().fatherName()); e.setBirthDate(r.attributes().birthDate()); e.setGender(r.attributes().gender()); e.setNationalIdCiphertext(r.attributes().nationalId().getBytes(StandardCharsets.UTF_8));
