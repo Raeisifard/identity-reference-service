@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ public class AdminConsoleController {
         var result = new LinkedHashMap<String, Object>();
         result.put("title", properties.getTitle());
         result.put("health", health.health().getStatus().getCode());
+        result.put("checkedAt", Instant.now());
+        result.put("providerCount", providers.all().size());
         result.put("providers", providers.all().stream().map(p -> p.descriptor().providerId()).sorted().toList());
         result.put("capabilities", capabilities());
         return result;
@@ -38,5 +41,19 @@ public class AdminConsoleController {
     public Map<String, Boolean> capabilities() {
         return Map.of("enabled", properties.isEnabled(), "development", properties.isDevelopmentEnabled(),
                 "integrationTesting", properties.isIntegrationTestingEnabled());
+    }
+
+    @GetMapping("/domains")
+    public Map<String, Object> domains() {
+        return Map.of("domains", java.util.List.of(
+                Map.of("id", "overview", "label", "Overview", "status", "available"),
+                Map.of("id", "providers", "label", "Providers", "status", "available"),
+                Map.of("id", "pipeline", "label", "Identity pipeline", "status", "available"),
+                Map.of("id", "cache", "label", "Cache", "status", "available"),
+                Map.of("id", "refresh", "label", "Refresh & scheduler", "status", "available"),
+                Map.of("id", "persistence", "label", "Persistence", "status", "available"),
+                Map.of("id", "metrics", "label", "Metrics", "status", "available"),
+                Map.of("id", "testing", "label", "Integration testing", "status", properties.isIntegrationTestingEnabled() ? "available" : "disabled")
+        ));
     }
 }
