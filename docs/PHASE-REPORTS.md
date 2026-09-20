@@ -20,7 +20,7 @@ This index mirrors prompts/PHASE-ORDER.md. Use the phase number first, then open
 | 14 | prompts/14-refresh-and-synchronization-engine.md | DONE | docs/refresh-and-synchronization.md |
 | 15 | prompts/15-scale-and-performance.md | DONE | docs/scale-and-performance.md |
 | 16 | prompts/16-failure-handling-idempotency-locking-and-recovery.md | DONE | docs/failure-handling-idempotency-locking-and-recovery.md |
-| 17 | prompts/17-data-governance-retention-and-audit.md | TODO | No implementation report yet |
+| 17 | prompts/17-data-governance-retention-and-audit.md | DONE | docs/phase-17-data-governance-retention-and-audit.md |
 | 18 | prompts/18-integration-contract-with-face-biometric-service.md | TODO | No implementation report yet |
 | 19 | prompts/19-automated-tests-and-end-to-end-validation.md | TODO | No implementation report yet |
 | 20 | prompts/20-production-hardening-and-security-review.md | TODO | No implementation report yet |
