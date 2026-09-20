@@ -43,6 +43,9 @@ identity-reference:
     refresh-executor-max-pool-size: 64
     refresh-executor-queue-capacity: 2000
     refresh-executor-thread-name-prefix: identity-refresh-
+    provider-executor-core-pool-size: 8
+    provider-executor-max-pool-size: 64
+    provider-executor-thread-name-prefix: identity-provider-
     providers:
       mock-national-agency:
         version: 1
@@ -55,19 +58,22 @@ identity-reference:
         initial-backoff: 1s
         max-backoff: 4s
         timeout: 5s
+        max-refresh-failures: 5
+        refresh-failure-initial-backoff: 1m
+        refresh-failure-max-backoff: 30m
         refresh-window-start: "00:00"
         refresh-window-end: "06:00"
   biometric:
     embedding-enabled: false
   operational:
-    request-logging-enabled: ${IDENTITY_REQUEST_LOGGING_ENABLED:true}
+    request-logging-enabled: \${IDENTITY_REQUEST_LOGGING_ENABLED:true}
   api:
     security:
       enabled: false
-      lookup-username: ${IDENTITY_API_LOOKUP_USERNAME:}
-      lookup-password: ${IDENTITY_API_LOOKUP_PASSWORD:}
-      admin-username: ${IDENTITY_API_ADMIN_USERNAME:}
-      admin-password: ${IDENTITY_API_ADMIN_PASSWORD:}
+      lookup-username: \${IDENTITY_API_LOOKUP_USERNAME:}
+      lookup-password: \${IDENTITY_API_LOOKUP_PASSWORD:}
+      admin-username: \${IDENTITY_API_ADMIN_USERNAME:}
+      admin-password: \${IDENTITY_API_ADMIN_PASSWORD:}
     rate-limit:
       enabled: true
-      requests-per-minute: ${IDENTITY_API_RATE_LIMIT_PER_MINUTE:60}
+      requests-per-minute: \${IDENTITY_API_RATE_LIMIT_PER_MINUTE:60}
