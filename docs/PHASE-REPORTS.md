@@ -16,12 +16,12 @@ This index mirrors prompts/PHASE-ORDER.md. Use the phase number first, then open
 | 10 | prompts/10-biometric-embedding-ingestion.md | DONE | docs/biometric-integration.md, docs/phase-10-oracle-smoke-test.md |
 | 11 | prompts/11-provider-adapter-framework-and-first-mock-provider.md | DONE | docs/provider-adapters.md |
 | 12 | prompts/12-secure-lookup-and-administrative-apis.md | DONE | docs/secure-lookup-and-admin-api.md |
-| 13 | prompts/13-observability-and-operational-controls.md | DONE | docs/observability-and-operational-controls.md, docs/operations.md |
+| 13 | prompts/13-observability-and-operational-controls.md | DONE | docs/observability-and-operations.md, docs/operations.md |
 | 14 | prompts/14-refresh-and-synchronization-engine.md | DONE | docs/refresh-and-synchronization.md |
 | 15 | prompts/15-scale-and-performance.md | DONE | docs/scale-and-performance.md |
 | 16 | prompts/16-failure-handling-idempotency-locking-and-recovery.md | DONE | docs/failure-handling-idempotency-locking-and-recovery.md |
 | 17 | prompts/17-data-governance-retention-and-audit.md | DONE | docs/phase-17-data-governance-retention-and-audit.md |
-| 18 | prompts/18-integration-contract-with-face-biometric-service.md | TODO | No implementation report yet |
+| 18 | prompts/18-integration-contract-with-face-biometric-service.md | DONE | docs/phase-18-integration-contract-with-face-biometric-service.md |
 | 19 | prompts/19-automated-tests-and-end-to-end-validation.md | TODO | No implementation report yet |
 | 20 | prompts/20-production-hardening-and-security-review.md | TODO | No implementation report yet |
 | 21 | prompts/21-data-protection-and-cryptographic-protection.md | TODO | No implementation report yet |
