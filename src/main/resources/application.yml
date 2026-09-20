@@ -76,4 +76,4 @@ identity-reference:
       admin-password: \${IDENTITY_API_ADMIN_PASSWORD:}
     rate-limit:
       enabled: true
-      requests-per-minute: \${IDENTITY_API_RATE_LIMIT_PER_MINUTE:60}
+      requests-per-minute: 60
