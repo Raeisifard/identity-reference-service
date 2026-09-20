@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.Executor;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -22,7 +23,7 @@ class IdentityReferenceRefreshServiceTest {
   IdentityProvider provider=new IdentityProvider(){public ProviderDescriptor descriptor(){return new ProviderDescriptor("mock-provider","Mock");}public ProviderLookupResult lookup(IdentityLookupKey k){return ProviderLookupResult.found("mock-provider","record-1",ProviderAuthority.AUTHORITATIVE,new IdentityAttributes("Ada","Lovelace","Byron",k.birthDate(),"F",k.nationalId()),Instant.parse("2026-09-20T08:00:00Z"));}};
   RefreshProperties properties=new RefreshProperties(); properties.getProviders().put("mock-provider",new RefreshProperties.Provider());
   @SuppressWarnings("unchecked") ObjectProvider<RedisL2Cache> l2=mock(ObjectProvider.class); when(l2.getIfAvailable()).thenReturn(null);
-  var service=new IdentityReferenceRefreshService(store,new IdentityProviderRegistry(List.of(provider)),new CaffeineL1Cache(10),l2,new RefreshPolicyResolver(properties),properties,new InMemoryRefreshLeaseManager(),new RefreshQuotaGuard(),new IdentityReferenceMetrics(new SimpleMeterRegistry()));
+  var service=new IdentityReferenceRefreshService(store,new IdentityProviderRegistry(List.of(provider)),new CaffeineL1Cache(10),l2,new RefreshPolicyResolver(properties),properties,new InMemoryRefreshLeaseManager(),new RefreshQuotaGuard(),new IdentityReferenceMetrics(new SimpleMeterRegistry()),Runnable::run);
   RefreshResult result=service.forceRefresh(key,"mock-provider",Instant.parse("2026-09-20T08:00:00Z"));
   assertEquals(RefreshResult.Status.REFRESHED,result.status()); assertNotNull(result.reference()); assertTrue(store.find(key).isPresent()); assertTrue(result.reference().freshness().freshUntil().isAfter(result.reference().freshness().acquiredAt()));
  }
