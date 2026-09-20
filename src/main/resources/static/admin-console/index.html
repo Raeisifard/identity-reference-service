@@ -1,26 +1,4 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Identity Reference Console</title>
-  <link rel="stylesheet" href="/admin-console/console.css">
-</head>
-<body>
-  <div class="shell">
-    <aside class="rail">
-      <div class="rail-top">
-        <div class="logo">IR</div><div class="wordmark"><b>Identity Reference</b><span>Admin console</span></div>
-      </div>
-      <div class="workspace"><span class="pulse"></span><div><b>Production</b><small>Connected workspace</small></div><span class="chevron">⌄</span></div>
-      <nav id="navigation" aria-label="Console navigation"></nav>
-      <div class="rail-bottom"><button class="rail-link" data-domain="settings">⚙ <span>Settings</span></button><div class="account"><span class="avatar">AD</span><div><b>Administrator</b><small>System operator</small></div><span>•••</span></div></div>
-    </aside>
-    <main class="main">
-      <header class="header"><div><div class="breadcrumbs">CONTROL PLANE <span>/</span> <b id="crumb">OVERVIEW</b></div><h1 id="pageTitle">Overview</h1><p id="pageDescription">A live view of your identity reference service.</p></div><div class="header-actions"><button class="quiet" id="refreshButton">↻ <span>Refresh</span></button><button class="primary" id="quickAction">＋ New action</button></div></header>
-      <div id="notice" class="notice hidden"></div>
-      <div id="app"></div>
-    </main>
-  </div>
-  <script src="/admin-console/console.js"></script>
-</body>
-</html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Identity Reference Service — Admin Test Console</title><link rel="stylesheet" href="/admin-console/console.css"></head>
+<body><div class="console-shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">IR</div><div><b>Identity Reference</b><span>Admin Test Console</span></div></div><div class="mode-card"><span class="mode-dot"></span><div><b id="modeName">SANDBOX</b><small>Non-production environment</small></div><span class="mode-tag">SAFE</span></div><nav id="navigation"></nav><div class="sidebar-bottom"><div class="guardrail"><b>Production safety</b><span>PII masking enforced</span><span>Correlation IDs required</span></div><div class="operator"><span class="avatar">BR</span><div><b>Behnam Raeisi Fard</b><small>Operator</small></div></div></div></aside><main class="main"><header class="topbar"><div><div class="crumb">CONSOLE <span>/</span> <b id="crumb">MONITORING &amp; OPERATIONS</b></div><h1 id="pageTitle">Monitoring &amp; Operations</h1><p id="pageDescription">Live service health, provider availability, and operational signals.</p></div><div class="top-actions"><button class="secondary" id="refreshButton">↻ Refresh</button><button class="primary" id="quickAction">＋ New action</button></div></header><div id="notice" class="notice hidden"></div><div id="app"></div></main></div><script src="/admin-console/console.js"></script></body></html>
