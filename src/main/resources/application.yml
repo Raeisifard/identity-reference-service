@@ -70,10 +70,18 @@ identity-reference:
   api:
     security:
       enabled: false
-      lookup-username: \${IDENTITY_API_LOOKUP_USERNAME:}
-      lookup-password: \${IDENTITY_API_LOOKUP_PASSWORD:}
-      admin-username: \${IDENTITY_API_ADMIN_USERNAME:}
-      admin-password: \${IDENTITY_API_ADMIN_PASSWORD:}
+      lookup-username: ${IDENTITY_API_LOOKUP_USERNAME:}
+      lookup-password: ${IDENTITY_API_LOOKUP_PASSWORD:}
+      admin-username: ${IDENTITY_API_ADMIN_USERNAME:}
+      admin-password: ${IDENTITY_API_ADMIN_PASSWORD:}
     rate-limit:
       enabled: true
       requests-per-minute: 60
+
+  governance:
+    enabled: true
+    identity-retention: 365d
+    retired-retention: 30d
+    audit-retention: 730d
+    purge-delay: 1h
+    purge-batch-size: 1000
