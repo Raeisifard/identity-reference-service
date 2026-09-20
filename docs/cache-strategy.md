@@ -1,4 +1,6 @@
-# Cache strategy
+# Phases 06–07 — Redis L2 and Caffeine L1 cache strategy
+
+**Status: DONE**
 
 Use bounded Caffeine L1, shared Redis L2 and Oracle durable storage.
 
@@ -8,4 +10,6 @@ Redis L2 uses a versioned JSON envelope and versioned key prefix. Its entry TTL 
 
 Refresh persistence is performed before cache population. Redis failures remain non-fatal because Oracle is the durable source of truth.
 
-For scheduled refresh, Oracle next_refresh_at is indexed and queried in bounded batches. Redis leases prevent concurrent instances from refreshing the same identity simultaneously.
+For scheduled refresh, Oracle next_refresh_at is indexed and queried in bounded batches. Redis leases prevent concurrent instances from refreshing the same identity where Redis leasing is enabled.
+
+Phase 16 will harden lock expiry, recovery and idempotency semantics.
