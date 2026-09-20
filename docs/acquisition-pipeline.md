@@ -1,6 +1,8 @@
-# Acquisition and refresh pipeline
+# Phase 08 — Acquisition and refresh pipeline
 
-Milestone 08 introduces the application pipeline boundary for provider acquisition.
+**Status: DONE**
+
+The Phase 08 application pipeline boundary is implemented.
 
 The pipeline:
 1. checks provider/policy eligibility;
@@ -13,6 +15,6 @@ The pipeline:
 8. updates L1 and L2 after persistence;
 9. keeps a request idempotency map to suppress duplicate work.
 
-The current idempotency store is process-local and therefore not sufficient for a multi-instance deployment. Distributed idempotency/locking is explicitly deferred to milestone 15.
+The current idempotency store is process-local and is not sufficient for a multi-instance deployment. Strong distributed idempotency, lease recovery and failure handling are Phase 16 work.
 
-The cache lookup key in this milestone is an internal deterministic composite for orchestration tests. A keyed lookup digest should replace it at the security boundary before production deployment.
+The lookup key used by this early milestone is an internal deterministic composite for orchestration tests. Final protected lookup material remains part of the Phase 21 data-protection decision.
