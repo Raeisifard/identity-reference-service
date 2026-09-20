@@ -13,8 +13,9 @@ import org.springframework.context.annotation.Configuration;
 public class OracleIdentityReferenceConfiguration {
 
     @Bean
-    IdentityReferenceStore identityReferenceStore(IdentityReferenceRepository repository) {
-        return new OracleIdentityReferenceStore(repository);
+    IdentityReferenceStore identityReferenceStore(IdentityReferenceRepository repository,
+                                                   BiometricReferenceRepository biometricRepository) {
+        return new OracleIdentityReferenceStore(repository, biometricRepository);
     }
 
     @Bean
