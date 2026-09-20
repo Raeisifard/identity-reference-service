@@ -34,19 +34,23 @@ identity-reference:
       key-prefix: "identity-ref:v1:"
   refresh:
     scheduler-enabled: true
-    scheduler-delay: 1m
-    batch-size: 100
+    scheduler-delay: 10s
+    batch-size: 1000
     lease-duration: 30s
     zone: UTC
     stale-while-refresh: true
+    refresh-executor-core-pool-size: 4
+    refresh-executor-max-pool-size: 16
+    refresh-executor-queue-capacity: 1000
+    refresh-executor-thread-name-prefix: identity-refresh-
     providers:
       mock-national-agency:
         version: 1
         ttl: 24h
         stale-grace: 12h
         refresh-before-expiry: 6h
-        max-requests-per-second: 10
-        max-concurrent-requests: 2
+        max-requests-per-second: 100
+        max-concurrent-requests: 16
         max-attempts: 2
         initial-backoff: 1s
         max-backoff: 4s
