@@ -22,6 +22,7 @@ This file is the single source of truth for milestone numbering. Prompt filename
 | 16 | Failure handling, idempotency, locking and recovery | TODO |
 | 17 | Data governance, retention and audit | TODO |
 | 18 | Integration contract with face-biometric-service | TODO |
+| 18.5 | Identity-reference storage schema and optional cache architecture | TODO |
 | 19 | Automated tests and end-to-end validation | TODO |
 | 20 | Production hardening and security review | TODO |
 | 21 | Data protection and cryptographic protection | TODO |
@@ -35,6 +36,7 @@ This file is the single source of truth for milestone numbering. Prompt filename
 - Phase 16 is failure/idempotency/locking/recovery.
 - Phase 17 is governance/retention/audit.
 - Phase 18 is face-biometric-service integration.
+- Phase 18.5 is the follow-up storage/schema and cache-architecture correction: versioned photos, model-aware embeddings, optional Redis, and no required Caffeine.
 - Phase 19 is automated/E2E validation.
 - Phase 20 is production hardening/security review.
 - Phase 21 is intentionally late: data protection and cryptographic implementation is deferred until the complete functional architecture and workflows are understood.
