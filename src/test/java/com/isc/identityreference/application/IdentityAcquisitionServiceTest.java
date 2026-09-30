@@ -1,6 +1,5 @@
 package com.isc.identityreference.application;
 
-import com.isc.identityreference.cache.l1.CaffeineL1Cache;
 import com.isc.identityreference.cache.redis.RedisL2Cache;
 import com.isc.identityreference.domain.identity.*;
 import com.isc.identityreference.domain.provider.ProviderAuthority;
@@ -17,27 +16,25 @@ class IdentityAcquisitionServiceTest {
     @Test void acquiresNormalizesPersistsAndCaches() {
         var store = new InMemoryStore();
         var provider = provider();
-        var l1 = new CaffeineL1Cache(10);
         RedisL2Cache l2 = new RedisL2Cache() {
             private final Map<String, IdentityReference> values = new HashMap<>();
             public Optional<IdentityReference> get(String k){return Optional.ofNullable(values.get(k));}
             public void put(String k, IdentityReference v){values.put(k,v);}
             public void evict(String k){values.remove(k);}
         };
-        var service = new IdentityAcquisitionService(store, provider, policy(), new ProviderPolicyEngine(), l1, l2);
+        var service = new IdentityAcquisitionService(store, provider, policy(), new ProviderPolicyEngine(), l2);
         var key = new IdentityLookupKey("ID-1", LocalDate.of(1815,12,10));
         var result = service.acquire(new IdentityAcquisitionRequest(key, "mock-provider", "request-1"),
                 Instant.parse("2026-09-18T00:00:00Z"));
         assertEquals(IdentityAcquisitionResult.Status.ACQUIRED, result.status());
         assertEquals(IdentityLifecycleState.ACTIVE, result.reference().lifecycleState());
         assertEquals(1, store.values.size());
-        assertTrue(l1.get(LookupKeyFingerprint.of(key)).isPresent());
     }
 
     @Test void idempotencyReturnsReplay() {
         var store = new InMemoryStore();
         var service = new IdentityAcquisitionService(store, provider(), policy(), new ProviderPolicyEngine(),
-                new CaffeineL1Cache(10), new NoopL2());
+                new NoopL2());
         var key = new IdentityLookupKey("ID-1", LocalDate.of(1815,12,10));
         var request = new IdentityAcquisitionRequest(key, "mock-provider", "same-request");
         var first = service.acquire(request, Instant.parse("2026-09-18T00:00:00Z"));

@@ -3,6 +3,7 @@ import com.isc.identityreference.application.IdentityReferenceStore;
 import com.isc.identityreference.application.InMemoryIdentityReferenceStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -10,7 +11,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration @EnableConfigurationProperties(RefreshProperties.class) @org.springframework.scheduling.annotation.EnableScheduling
 public class RefreshConfiguration{
- @Bean @ConditionalOnMissingBean(IdentityReferenceStore.class) IdentityReferenceStore inMemoryIdentityReferenceStore(){return new InMemoryIdentityReferenceStore();}
+ @Bean @ConditionalOnMissingBean(IdentityReferenceStore.class) @ConditionalOnExpression("!${identity-reference.persistence.h2.enabled:false} && !${identity-reference.persistence.oracle.enabled:false}") IdentityReferenceStore inMemoryIdentityReferenceStore(){return new InMemoryIdentityReferenceStore();}
  @Bean RefreshQuotaGuard refreshQuotaGuard(){return new RefreshQuotaGuard();}
  @Bean @ConditionalOnMissingBean(RefreshLeaseManager.class) RefreshLeaseManager inMemoryRefreshLeaseManager(){return new InMemoryRefreshLeaseManager();}
  @Bean @Qualifier("identityRefreshExecutor") TaskExecutor identityRefreshExecutor(RefreshProperties p){
