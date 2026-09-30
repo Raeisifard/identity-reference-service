@@ -4,6 +4,8 @@
 
 Build the **Admin Console V2** for `identity-reference-service` from the current `main` architecture rather than merging the old `feature/admin-console-v1` implementation.
 
+This plan targets the current storage architecture: H2 file-backed persistence for the `dev` profile, Oracle persistence for `local`/`oracle` production-oriented profiles, and Redis as an optional acceleration layer. Redis is never the source of truth and the console must work correctly when Redis is disabled. No local in-memory cache is required.
+
 The attached `Identity_Reference_Service_Admin_Test_Console.pdf` is the visual/design reference. Preserve its visual language and information hierarchy:
 
 - dark brown / near-black application shell
@@ -86,6 +88,7 @@ At minimum:
 - `sections.lookup.enabled`
 - `sections.administration.enabled`
 - `sections.biometric.enabled`
+- `sections.test-data.enabled`
 - `sections.api-testing.enabled`
 - `sections.governance.enabled`
 - `sections.audit.enabled`
@@ -173,6 +176,7 @@ Use the PDF's enterprise-style navigation and organize the console into logical 
 ### Integration Testing
 
 - API Explorer
+- Development/Test Identity Data
 - Biometric reference / contract viewer
 - Smoke tests
 - Test history
@@ -248,7 +252,7 @@ Expected integrations include:
 - provider registry -> existing provider SPI/registry
 - health -> Spring/application health
 - observability -> existing metrics/operational services
-- cache -> existing Redis/Caffeine state where safely observable
+- cache -> existing optional Redis state where safely observable; when Redis is disabled, show the active database as the direct persistence path
 - refresh -> existing refresh/synchronization engine
 - governance -> existing retirement/audit/retention services
 - biometric -> Phase 18 model-aware biometric integration
@@ -288,6 +292,8 @@ Requirements:
 - clearly label sandbox/testing mode
 
 The API Explorer must not bypass normal authentication, authorization, validation, rate limiting or audit mechanisms.
+
+The Development/Test Identity Data section is separate from the API Explorer. It must use its dedicated server-side feature flag and environment guard defined by `ADMIN-CONSOLE-TEST-DATA-PLAN.md`.
 
 ---
 
@@ -342,8 +348,8 @@ It should contain:
 - provider SPI
 - acquisition/refresh flow
 - Oracle persistence
-- Redis L2 cache
-- Caffeine L1 cache
+- optional Redis acceleration layer
+- active durable database (H2 file in `dev`, Oracle in `local`/`oracle`)
 - refresh scheduler
 - failure/recovery and leases
 - governance/audit
@@ -598,6 +604,7 @@ Recommended defaults:
 - console enabled: true
 - authentication: true and mandatory
 - API testing: false
+- Development/Test Identity Data: false
 - synthetic testing: false unless explicitly enabled
 - raw export: false
 - destructive actions: confirmation + authorization + audit
