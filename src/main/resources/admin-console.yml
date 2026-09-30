@@ -1,0 +1,66 @@
+identity-reference:
+  admin-console:
+    enabled: true
+    title: Identity Reference Service Admin Console
+    path: /admin-console
+    development-mode: false
+    authentication:
+      enabled: true
+      login-page-enabled: true
+      session-timeout-minutes: 30
+    help-center:
+      enabled: true
+    sections:
+      dashboard: true
+      monitoring: true
+      providers: true
+      cache: true
+      refresh: true
+      lookup: true
+      administration: true
+      biometric: true
+      test-data: false
+      api-testing: false
+      governance: true
+      audit: true
+      security: true
+      system: true
+      help: true
+    test-data:
+      max-photo-bytes: 5242880
+      max-photo-width: 4096
+      max-photo-height: 4096
+      allowed-content-types: [image/jpeg, image/png]
+      allow-purge: false
+      biometric-enabled: false
+      biometric-model-id: mock-arcface
+      biometric-model-version: dev
+      biometric-dimension: 512
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+identity-reference:
+  admin-console:
+    development-mode: true
+    authentication:
+      enabled: false
+    sections:
+      test-data: true
+      api-testing: true
+    test-data:
+      biometric-enabled: true
+---
+spring:
+  config:
+    activate:
+      on-profile: "local | oracle"
+identity-reference:
+  admin-console:
+    development-mode: false
+    authentication:
+      enabled: true
+    sections:
+      test-data: false
+      api-testing: false
