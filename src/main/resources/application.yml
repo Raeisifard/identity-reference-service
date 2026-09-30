@@ -3,6 +3,8 @@ spring:
     name: identity-reference-service
   profiles:
     default: dev
+  config:
+    import: optional:classpath:admin-console.yml
 server:
   port: 8080
 management:
@@ -74,7 +76,6 @@ identity-reference:
     rate-limit:
       enabled: true
       requests-per-minute: 60
-
   governance:
     enabled: true
     identity-retention: 365d
