@@ -6,12 +6,21 @@ spring:
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     open-in-view: false
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration/h2
 
 identity-reference:
+  persistence:
+    h2:
+      enabled: true
+    oracle:
+      enabled: false
+  cache:
+    redis:
+      enabled: false
   provider:
     real-integrations-enabled: false
     adapters:

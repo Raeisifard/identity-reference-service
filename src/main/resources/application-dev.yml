@@ -1,19 +1,19 @@
 spring:
   config:
     activate:
-      on-profile: oracle
+      on-profile: dev
   datasource:
-    url: ${IDENTITY_ORACLE_URL:jdbc:oracle:thin:@//172.16.88.115:1521/XEPDB1}
-    username: ${IDENTITY_ORACLE_USERNAME:IDENTITY_APP}
-    password: ${IDENTITY_ORACLE_PASSWORD:ora123}
-    driver-class-name: oracle.jdbc.OracleDriver
+    url: ${IDENTITY_H2_URL:jdbc:h2:file:${IDENTITY_H2_PATH:./data/identity-reference};MODE=Oracle;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${IDENTITY_H2_USERNAME:sa}
+    password: ${IDENTITY_H2_PASSWORD:}
+    driver-class-name: org.h2.Driver
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration/h2
   data:
     redis:
       host: ${IDENTITY_REDIS_HOST:172.16.88.115}
@@ -29,11 +29,11 @@ logging:
 identity-reference:
   persistence:
     h2:
-      enabled: false
-    oracle:
       enabled: true
+    oracle:
+      enabled: false
   cache:
     redis:
-      enabled: ${IDENTITY_REDIS_ENABLED:true}
+      enabled: ${IDENTITY_REDIS_ENABLED:false}
       key-prefix: "${IDENTITY_REDIS_KEY_PREFIX:identity-ref:v1:}"
       entry-ttl: ${IDENTITY_REDIS_ENTRY_TTL:24h}

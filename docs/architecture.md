@@ -3,12 +3,12 @@
 **Status: IMPLEMENTED BASELINE**
 
 Request path:
-Client -> API -> Caffeine L1 -> Redis L2 -> Oracle -> provider acquisition when missing/stale -> normalize/validate -> optional embedding -> Oracle -> cache.
+Client -> API -> optional Redis -> durable database (H2 in dev, Oracle in production) -> provider acquisition when missing/stale -> normalize/validate -> optional embedding -> cache.
 
 Refresh path:
-Scheduler -> due records -> provider policy -> distributed lease -> provider adapter -> validation -> merge -> persist -> embedding if required -> cache -> metrics/audit as the later milestones are completed.
+Scheduler -> due records -> provider policy -> distributed lease when Redis is enabled -> provider adapter -> validation -> merge -> persist -> optional cache -> metrics/audit as the later milestones are completed.
 
-Oracle is durable truth. Redis and Caffeine are acceleration layers and must be rebuildable.
+The selected database is durable truth. Redis is an optional acceleration/coordination layer. When Redis is disabled, requests go directly to the selected database with no local cache fallback.
 
 API, application, domain, provider, policy, cache, persistence, biometric, scheduler, security and observability boundaries remain separate.
 

@@ -1,6 +1,5 @@
 package com.isc.identityreference.application;
 
-import com.isc.identityreference.cache.l1.CaffeineL1Cache;
 import com.isc.identityreference.cache.redis.RedisL2Cache;
 import com.isc.identityreference.domain.freshness.Freshness;
 import com.isc.identityreference.domain.identity.*;
@@ -22,25 +21,23 @@ public final class IdentityAcquisitionService {
     private final IdentityProviderRegistry providers;
     private final ProviderPolicy policy;
     private final ProviderPolicyEngine policyEngine;
-    private final CaffeineL1Cache l1;
     private final RedisL2Cache l2;
     private final ConcurrentMap<String, IdentityAcquisitionResult> idempotency = new ConcurrentHashMap<>();
 
     public IdentityAcquisitionService(IdentityReferenceStore store, IdentityProvider provider,
                                       ProviderPolicy policy, ProviderPolicyEngine policyEngine,
-                                      CaffeineL1Cache l1, RedisL2Cache l2) {
-        this(store, IdentityProviderRegistry.single(provider), policy, policyEngine, l1, l2);
+                                      RedisL2Cache l2) {
+        this(store, IdentityProviderRegistry.single(provider), policy, policyEngine, l2);
     }
 
     public IdentityAcquisitionService(IdentityReferenceStore store, IdentityProviderRegistry providers,
                                       ProviderPolicy policy, ProviderPolicyEngine policyEngine,
-                                      CaffeineL1Cache l1, RedisL2Cache l2) {
+                                      RedisL2Cache l2) {
         this.store = Objects.requireNonNull(store, "store");
         this.providers = Objects.requireNonNull(providers, "providers");
         this.policy = Objects.requireNonNull(policy, "policy");
         this.policyEngine = Objects.requireNonNull(policyEngine, "policyEngine");
-        this.l1 = Objects.requireNonNull(l1, "l1");
-        this.l2 = Objects.requireNonNull(l2, "l2");
+        this.l2 = l2;
     }
 
     public IdentityAcquisitionResult acquire(IdentityAcquisitionRequest request, Instant now) {
@@ -61,8 +58,8 @@ public final class IdentityAcquisitionService {
         }
 
         String cacheKey = LookupKeyFingerprint.of(request.lookupKey());
-        Optional<IdentityReference> cached = l1.get(cacheKey);
-        if (cached.isEmpty()) cached = l2.get(cacheKey);
+        Optional<IdentityReference> cached = l2 == null ? Optional.empty() : l2.get(cacheKey);
+        if (cached.isEmpty()) cached = store.find(request.lookupKey());
         if (cached.isPresent()) {
             IdentityAcquisitionResult result =
                     new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, cached.get());
@@ -105,8 +102,7 @@ public final class IdentityAcquisitionService {
                 existing == null ? now : existing.createdAt(), now);
 
         IdentityReference saved = store.save(reference);
-        l1.put(cacheKey, saved);
-        l2.put(cacheKey, saved);
+        if (l2 != null) l2.put(cacheKey, saved);
 
         IdentityAcquisitionResult acquired =
                 new IdentityAcquisitionResult(IdentityAcquisitionResult.Status.ACQUIRED, saved);

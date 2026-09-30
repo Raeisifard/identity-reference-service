@@ -2,7 +2,7 @@ spring:
   application:
     name: identity-reference-service
   profiles:
-    default: local
+    default: dev
 server:
   port: 8080
 management:
@@ -26,9 +26,6 @@ identity-reference:
     oracle:
       enabled: false
   cache:
-    l1:
-      enabled: true
-      maximum-size: 10000
     redis:
       enabled: false
       key-prefix: "identity-ref:v1:"

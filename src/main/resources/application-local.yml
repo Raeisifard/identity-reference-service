@@ -28,10 +28,12 @@ logging:
   config: classpath:log4j2-spring.xml
 identity-reference:
   persistence:
+    h2:
+      enabled: false
     oracle:
       enabled: true
   cache:
     redis:
-      enabled: true
+      enabled: ${IDENTITY_REDIS_ENABLED:true}
       key-prefix: "${IDENTITY_REDIS_KEY_PREFIX:identity-ref:v1:}"
       entry-ttl: ${IDENTITY_REDIS_ENTRY_TTL:24h}
