@@ -1,28 +1,221 @@
 package com.isc.identityreference.admin;
-import com.isc.identityreference.application.*;import com.isc.identityreference.domain.freshness.Freshness;import com.isc.identityreference.domain.identity.*;import com.isc.identityreference.domain.lifecycle.IdentityLifecycleState;import com.isc.identityreference.domain.biometric.EmbeddingMetric;import com.isc.identityreference.governance.*;import com.isc.identityreference.policy.ProviderPolicy;import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;import org.springframework.stereotype.Service;import org.springframework.web.multipart.MultipartFile;import javax.imageio.ImageIO;import java.io.*;import java.time.*;import java.util.*;
-@Service @ConditionalOnProperty(prefix="identity-reference.admin-console.sections",name="test-data",havingValue="true")
-public class TestIdentityFixtureService{
- private final IdentityReferenceStore identityStore;private final TestIdentityFixtureRepository fixtures;private final AuditEventStore audit;private final DataGovernanceService governance;private final AdminConsoleProperties props;private final Optional<BiometricIngestionService> biometric;
- public TestIdentityFixtureService(IdentityReferenceStore s,TestIdentityFixtureRepository f,AuditEventStore a,DataGovernanceService g,AdminConsoleProperties p,Optional<BiometricIngestionService> b){identityStore=s;fixtures=f;audit=a;governance=g;props=p;biometric=b;}
- public List<TestIdentityView> list(){return fixtures.findAllByOrderByCreatedAtDesc().stream().map(this::view).toList();}
- public TestIdentityView create(TestIdentityRequest r,MultipartFile photo,String actor)throws IOException{
-  validate(r);var key=new IdentityLookupKey(r.nationalId(),r.birthDate());if(identityStore.find(key).isPresent())throw new IllegalStateException("An identity already exists for this national ID and birth date");
-  byte[] bytes=readPhoto(photo,false);Instant now=Instant.now();var ref=new IdentityReference(IdentityReferenceId.newId(),key,new IdentityAttributes(r.firstName(),r.familyName(),r.fatherName(),r.birthDate(),r.gender(),r.nationalId()),List.of(),List.of(),IdentityLifecycleState.ACTIVE,new Freshness(now,now.plusDays(365),now.plusDays(395)),now,now);identityStore.save(ref);
-  var f=new TestIdentityFixtureEntity();f.setIdentityReferenceId(ref.id().value().toString());apply(f,r,photo,bytes,actor,now,1);fixtures.save(f);processBio(f,bytes,now);audit.append(event(key,"TEST_FIXTURE_CREATED",actor,"NEW","ACTIVE",now));return view(f);
- }
- public TestIdentityView update(UUID id,TestIdentityRequest r,String actor){validate(r);var f=fixtures.findById(id.toString()).orElseThrow(()->new NoSuchElementException("Test identity not found"));var cur=identityStore.findById(id).orElseThrow(()->new NoSuchElementException("Identity reference not found"));if(!cur.lookupKey().nationalId().equals(r.nationalId())||!cur.lookupKey().birthDate().equals(r.birthDate()))throw new IllegalArgumentException("National ID and birth date are immutable");var now=Instant.now();identityStore.save(new IdentityReference(cur.id(),cur.lookupKey(),new IdentityAttributes(r.firstName(),r.familyName(),r.fatherName(),r.birthDate(),r.gender(),r.nationalId()),cur.providerRecords(),cur.biometricReferences(),cur.lifecycleState(),cur.freshness(),cur.createdAt(),now));apply(f,r,null,null,actor,now,0);fixtures.save(f);audit.append(event(cur.lookupKey(),"TEST_FIXTURE_UPDATED",actor,cur.lifecycleState().name(),cur.lifecycleState().name(),now));return view(f);}
- public TestIdentityView replacePhoto(UUID id,MultipartFile photo,String actor)throws IOException{var f=fixtures.findById(id.toString()).orElseThrow(()->new NoSuchElementException("Test identity not found"));byte[] b=readPhoto(photo,true);var now=Instant.now();f.setPhotoVersion("v"+(version(f.getPhotoVersion())+1));f.setPhotoContent(b);f.setPhotoContentType(photo.getContentType());f.setPhotoSize((long)b.length);f.setBiometricStatus("PENDING");f.setUpdatedBy(actor);f.setUpdatedAt(now);fixtures.save(f);processBio(f,b,now);var cur=identityStore.findById(id).orElseThrow();audit.append(event(cur.lookupKey(),"TEST_FIXTURE_PHOTO_REPLACED",actor,cur.lifecycleState().name(),cur.lifecycleState().name(),now));return view(f);}
- public TestIdentityView rebuildBiometric(UUID id,String actor){var f=fixtures.findById(id.toString()).orElseThrow(()->new NoSuchElementException("Test identity not found"));if(f.getPhotoContent()==null)throw new IllegalStateException("No reference photo is available");if(biometric.isEmpty())throw new IllegalStateException("Biometric ingestion is not enabled");processBio(f,f.getPhotoContent(),Instant.now());f.setUpdatedBy(actor);f.setUpdatedAt(Instant.now());fixtures.save(f);return view(f);}
- public Photo photo(UUID id){var f=fixtures.findById(id.toString()).orElseThrow(()->new NoSuchElementException("Test identity not found"));if(f.getPhotoContent()==null)throw new NoSuchElementException("Photo not available");return new Photo(f.getPhotoContentType(),f.getPhotoContent());}
- public TestIdentityView retire(UUID id,String reason,String actor){var f=fixtures.findById(id.toString()).orElseThrow(()->new NoSuchElementException("Test identity not found"));var cur=identityStore.findById(id).orElseThrow(()->new NoSuchElementException("Identity reference not found"));if(governance.retire(cur.lookupKey(),actor,reason==null||reason.isBlank()?"TEST_FIXTURE_RETIRE":reason,UUID.randomUUID(),Instant.now()).isEmpty())throw new NoSuchElementException("Identity reference not found");f.setBiometricStatus("RETIRED");f.setUpdatedBy(actor);f.setUpdatedAt(Instant.now());fixtures.save(f);return view(f);}
- private void processBio(TestIdentityFixtureEntity f,byte[] bytes,Instant now){if(bytes==null||!props.getTestData().isBiometricEnabled()||biometric.isEmpty())return;var p=props.getTestData();var policy=new ProviderPolicy.EmbeddingPolicy(true,p.getBiometricModelId(),p.getBiometricModelVersion(),p.getBiometricDimension(),EmbeddingMetric.COSINE,true);try{var result=biometric.get().ingest(f.getIdentityReferenceId(),bytes,f.getPhotoVersion(),policy,now);f.setBiometricStatus(result==BiometricIngestionService.Result.STORED?"ACTIVE":result.name());fixtures.save(f);}catch(RuntimeException e){f.setBiometricStatus("FAILED");fixtures.save(f);}}
- private void apply(TestIdentityFixtureEntity f,TestIdentityRequest r,MultipartFile p,byte[] b,String actor,Instant now,int version){f.setFixtureLabel(r.fixtureLabel());f.setScenarioTag(r.scenarioTag());f.setNationality(r.nationality());f.setExpirationDate(r.expirationDate());if(b!=null){f.setPhotoVersion("v"+version);f.setPhotoContent(b);f.setPhotoContentType(p.getContentType());f.setPhotoSize((long)b.length);f.setBiometricStatus("PENDING");}f.setCreatedBy(f.getCreatedBy()==null?actor:f.getCreatedBy());if(f.getCreatedAt()==null)f.setCreatedAt(now);f.setUpdatedBy(actor);f.setUpdatedAt(now);}
- private byte[] readPhoto(MultipartFile p,boolean required)throws IOException{if(p==null||p.isEmpty()){if(required)throw new IllegalArgumentException("Photo is required");return null;}if(p.getSize()>props.getTestData().getMaxPhotoBytes())throw new IllegalArgumentException("Photo exceeds configured maximum size");String ct=p.getContentType();if(ct==null||Arrays.stream(props.getTestData().getAllowedContentTypes()).noneMatch(ct::equalsIgnoreCase))throw new IllegalArgumentException("Unsupported photo content type");byte[] b=p.getBytes();var img=ImageIO.read(new ByteArrayInputStream(b));if(img==null)throw new IllegalArgumentException("Uploaded content is not a decodable image");if(img.getWidth()>props.getTestData().getMaxPhotoWidth()||img.getHeight()>props.getTestData().getMaxPhotoHeight())throw new IllegalArgumentException("Photo dimensions exceed configured limits");return b;}
- private void validate(TestIdentityRequest r){if(r==null||blank(r.firstName())||blank(r.familyName())||blank(r.nationalId()))throw new IllegalArgumentException("First name, family name and national ID are required");if(r.birthDate()==null)throw new IllegalArgumentException("Birth date is required");if(r.expirationDate()!=null&&r.expirationDate().isBefore(r.birthDate()))throw new IllegalArgumentException("Expiration date must not precede birth date");}
- private boolean blank(String s){return s==null||s.isBlank();}private int version(String s){try{return s==null?0:Integer.parseInt(s.substring(1));}catch(Exception e){return 0;}}
- private TestIdentityView view(TestIdentityFixtureEntity f){var r=identityStore.findById(UUID.fromString(f.getIdentityReferenceId())).orElseThrow();String n=r.attributes().nationalId();String m=n.length()<=4?"****":"*".repeat(n.length()-4)+n.substring(n.length()-4);return new TestIdentityView(UUID.fromString(f.getIdentityReferenceId()),r.attributes().givenName(),r.attributes().familyName(),m,r.attributes().birthDate(),f.getNationality(),f.getExpirationDate(),f.getPhotoVersion(),f.getPhotoSize(),f.getBiometricStatus(),r.lifecycleState().name(),f.getFixtureLabel(),f.getScenarioTag(),f.getCreatedAt(),f.getUpdatedAt());}
- private AuditEvent event(IdentityLookupKey k,String type,String actor,String from,String to,Instant now){return new AuditEvent(UUID.randomUUID(),LookupKeyFingerprint.of(k),type,actor,null,"DEV_TEST",null,from,to,UUID.randomUUID(),now);}
- public record TestIdentityRequest(String firstName,String familyName,String fatherName,String nationalId,LocalDate birthDate,LocalDate expirationDate,String nationality,String gender,String fixtureLabel,String scenarioTag){}
- public record TestIdentityView(UUID identityReferenceId,String firstName,String familyName,String maskedNationalId,LocalDate birthDate,String nationality,LocalDate expirationDate,String photoVersion,Long photoSize,String biometricStatus,String lifecycleState,String fixtureLabel,String scenarioTag,Instant createdAt,Instant updatedAt){}
- public record Photo(String contentType,byte[] bytes){}
+
+import com.isc.identityreference.application.*;
+import com.isc.identityreference.domain.freshness.Freshness;
+import com.isc.identityreference.domain.identity.*;
+import com.isc.identityreference.domain.lifecycle.IdentityLifecycleState;
+import com.isc.identityreference.domain.biometric.EmbeddingMetric;
+import com.isc.identityreference.governance.*;
+import com.isc.identityreference.policy.ProviderPolicy;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.io.*;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
+@Service
+@ConditionalOnProperty(prefix = "identity-reference.admin-console.sections", name = "test-data", havingValue = "true")
+public class TestIdentityFixtureService {
+    private final IdentityReferenceStore identityStore;
+    private final TestIdentityFixtureRepository fixtures;
+    private final AuditEventStore audit;
+    private final DataGovernanceService governance;
+    private final AdminConsoleProperties props;
+    private final Optional<BiometricIngestionService> biometric;
+
+    public TestIdentityFixtureService(IdentityReferenceStore s, TestIdentityFixtureRepository f, AuditEventStore a, DataGovernanceService g, AdminConsoleProperties p, Optional<BiometricIngestionService> b) {
+        identityStore = s;
+        fixtures = f;
+        audit = a;
+        governance = g;
+        props = p;
+        biometric = b;
+    }
+
+    public List<TestIdentityView> list() {
+        return fixtures.findAllByOrderByCreatedAtDesc().stream().map(this::view).toList();
+    }
+
+    public TestIdentityView create(TestIdentityRequest r, MultipartFile photo, String actor) throws IOException {
+        validate(r);
+        var key = new IdentityLookupKey(r.nationalId(), r.birthDate());
+        if (identityStore.find(key).isPresent())
+            throw new IllegalStateException("An identity already exists for this national ID and birth date");
+        byte[] bytes = readPhoto(photo, false);
+        Instant now = Instant.now();
+        var ref = new IdentityReference(IdentityReferenceId.newId(), key, new IdentityAttributes(r.firstName(), r.familyName(), r.fatherName(), r.birthDate(), r.gender(), r.nationalId()), List.of(), List.of(), IdentityLifecycleState.ACTIVE, new Freshness(
+                now,
+                now.plus(365, ChronoUnit.DAYS),
+                now.plus(395, ChronoUnit.DAYS)
+        ), now, now);
+        identityStore.save(ref);
+        var f = new TestIdentityFixtureEntity();
+        f.setIdentityReferenceId(ref.id().value().toString());
+        apply(f, r, photo, bytes, actor, now, 1);
+        fixtures.save(f);
+        processBio(f, bytes, now);
+        audit.append(event(key, "TEST_FIXTURE_CREATED", actor, "NEW", "ACTIVE", now));
+        return view(f);
+    }
+
+    public TestIdentityView update(UUID id, TestIdentityRequest r, String actor) {
+        validate(r);
+        var f = fixtures.findById(id.toString()).orElseThrow(() -> new NoSuchElementException("Test identity not found"));
+        var cur = identityStore.findById(id).orElseThrow(() -> new NoSuchElementException("Identity reference not found"));
+        if (!cur.lookupKey().nationalId().equals(r.nationalId()) || !cur.lookupKey().birthDate().equals(r.birthDate()))
+            throw new IllegalArgumentException("National ID and birth date are immutable");
+        var now = Instant.now();
+        identityStore.save(new IdentityReference(cur.id(), cur.lookupKey(), new IdentityAttributes(r.firstName(), r.familyName(), r.fatherName(), r.birthDate(), r.gender(), r.nationalId()), cur.providerRecords(), cur.biometricReferences(), cur.lifecycleState(), cur.freshness(), cur.createdAt(), now));
+        apply(f, r, null, null, actor, now, 0);
+        fixtures.save(f);
+        audit.append(event(cur.lookupKey(), "TEST_FIXTURE_UPDATED", actor, cur.lifecycleState().name(), cur.lifecycleState().name(), now));
+        return view(f);
+    }
+
+    public TestIdentityView replacePhoto(UUID id, MultipartFile photo, String actor) throws IOException {
+        var f = fixtures.findById(id.toString()).orElseThrow(() -> new NoSuchElementException("Test identity not found"));
+        byte[] b = readPhoto(photo, true);
+        var now = Instant.now();
+        f.setPhotoVersion("v" + (version(f.getPhotoVersion()) + 1));
+        f.setPhotoContent(b);
+        f.setPhotoContentType(photo.getContentType());
+        f.setPhotoSize((long) b.length);
+        f.setBiometricStatus("PENDING");
+        f.setUpdatedBy(actor);
+        f.setUpdatedAt(now);
+        fixtures.save(f);
+        processBio(f, b, now);
+        var cur = identityStore.findById(id).orElseThrow();
+        audit.append(event(cur.lookupKey(), "TEST_FIXTURE_PHOTO_REPLACED", actor, cur.lifecycleState().name(), cur.lifecycleState().name(), now));
+        return view(f);
+    }
+
+    public TestIdentityView rebuildBiometric(UUID id, String actor) {
+        var f = fixtures.findById(id.toString()).orElseThrow(() -> new NoSuchElementException("Test identity not found"));
+        if (f.getPhotoContent() == null) throw new IllegalStateException("No reference photo is available");
+        if (biometric.isEmpty()) throw new IllegalStateException("Biometric ingestion is not enabled");
+        processBio(f, f.getPhotoContent(), Instant.now());
+        f.setUpdatedBy(actor);
+        f.setUpdatedAt(Instant.now());
+        fixtures.save(f);
+        return view(f);
+    }
+
+    public Photo photo(UUID id) {
+        var f = fixtures.findById(id.toString()).orElseThrow(() -> new NoSuchElementException("Test identity not found"));
+        if (f.getPhotoContent() == null) throw new NoSuchElementException("Photo not available");
+        return new Photo(f.getPhotoContentType(), f.getPhotoContent());
+    }
+
+    public TestIdentityView retire(UUID id, String reason, String actor) {
+        var f = fixtures.findById(id.toString()).orElseThrow(() -> new NoSuchElementException("Test identity not found"));
+        var cur = identityStore.findById(id).orElseThrow(() -> new NoSuchElementException("Identity reference not found"));
+        if (governance.retire(cur.lookupKey(), actor, reason == null || reason.isBlank() ? "TEST_FIXTURE_RETIRE" : reason, UUID.randomUUID(), Instant.now()).isEmpty())
+            throw new NoSuchElementException("Identity reference not found");
+        f.setBiometricStatus("RETIRED");
+        f.setUpdatedBy(actor);
+        f.setUpdatedAt(Instant.now());
+        fixtures.save(f);
+        return view(f);
+    }
+
+    private void processBio(TestIdentityFixtureEntity f, byte[] bytes, Instant now) {
+        if (bytes == null || !props.getTestData().isBiometricEnabled() || biometric.isEmpty()) return;
+        var p = props.getTestData();
+        var policy = new ProviderPolicy.EmbeddingPolicy(true, p.getBiometricModelId(), p.getBiometricModelVersion(), p.getBiometricDimension(), EmbeddingMetric.COSINE, true);
+        try {
+            var result = biometric.get().ingest(f.getIdentityReferenceId(), bytes, f.getPhotoVersion(), policy, now);
+            f.setBiometricStatus(result == BiometricIngestionService.Result.STORED ? "ACTIVE" : result.name());
+            fixtures.save(f);
+        } catch (RuntimeException e) {
+            f.setBiometricStatus("FAILED");
+            fixtures.save(f);
+        }
+    }
+
+    private void apply(TestIdentityFixtureEntity f, TestIdentityRequest r, MultipartFile p, byte[] b, String actor, Instant now, int version) {
+        f.setFixtureLabel(r.fixtureLabel());
+        f.setScenarioTag(r.scenarioTag());
+        f.setNationality(r.nationality());
+        f.setExpirationDate(r.expirationDate());
+        if (b != null) {
+            f.setPhotoVersion("v" + version);
+            f.setPhotoContent(b);
+            f.setPhotoContentType(p.getContentType());
+            f.setPhotoSize((long) b.length);
+            f.setBiometricStatus("PENDING");
+        }
+        f.setCreatedBy(f.getCreatedBy() == null ? actor : f.getCreatedBy());
+        if (f.getCreatedAt() == null) f.setCreatedAt(now);
+        f.setUpdatedBy(actor);
+        f.setUpdatedAt(now);
+    }
+
+    private byte[] readPhoto(MultipartFile p, boolean required) throws IOException {
+        if (p == null || p.isEmpty()) {
+            if (required) throw new IllegalArgumentException("Photo is required");
+            return null;
+        }
+        if (p.getSize() > props.getTestData().getMaxPhotoBytes())
+            throw new IllegalArgumentException("Photo exceeds configured maximum size");
+        String ct = p.getContentType();
+        if (ct == null || Arrays.stream(props.getTestData().getAllowedContentTypes()).noneMatch(ct::equalsIgnoreCase))
+            throw new IllegalArgumentException("Unsupported photo content type");
+        byte[] b = p.getBytes();
+        var img = ImageIO.read(new ByteArrayInputStream(b));
+        if (img == null) throw new IllegalArgumentException("Uploaded content is not a decodable image");
+        if (img.getWidth() > props.getTestData().getMaxPhotoWidth() || img.getHeight() > props.getTestData().getMaxPhotoHeight())
+            throw new IllegalArgumentException("Photo dimensions exceed configured limits");
+        return b;
+    }
+
+    private void validate(TestIdentityRequest r) {
+        if (r == null || blank(r.firstName()) || blank(r.familyName()) || blank(r.nationalId()))
+            throw new IllegalArgumentException("First name, family name and national ID are required");
+        if (r.birthDate() == null) throw new IllegalArgumentException("Birth date is required");
+        if (r.expirationDate() != null && r.expirationDate().isBefore(r.birthDate()))
+            throw new IllegalArgumentException("Expiration date must not precede birth date");
+    }
+
+    private boolean blank(String s) {
+        return s == null || s.isBlank();
+    }
+
+    private int version(String s) {
+        try {
+            return s == null ? 0 : Integer.parseInt(s.substring(1));
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private TestIdentityView view(TestIdentityFixtureEntity f) {
+        var r = identityStore.findById(UUID.fromString(f.getIdentityReferenceId())).orElseThrow();
+        String n = r.attributes().nationalId();
+        String m = n.length() <= 4 ? "****" : "*".repeat(n.length() - 4) + n.substring(n.length() - 4);
+        return new TestIdentityView(UUID.fromString(f.getIdentityReferenceId()), r.attributes().givenName(), r.attributes().familyName(), m, r.attributes().birthDate(), f.getNationality(), f.getExpirationDate(), f.getPhotoVersion(), f.getPhotoSize(), f.getBiometricStatus(), r.lifecycleState().name(), f.getFixtureLabel(), f.getScenarioTag(), f.getCreatedAt(), f.getUpdatedAt());
+    }
+
+    private AuditEvent event(IdentityLookupKey k, String type, String actor, String from, String to, Instant now) {
+        return new AuditEvent(UUID.randomUUID(), LookupKeyFingerprint.of(k), type, actor, null, "DEV_TEST", null, from, to, UUID.randomUUID(), now);
+    }
+
+    public record TestIdentityRequest(String firstName, String familyName, String fatherName, String nationalId,
+                                      LocalDate birthDate, LocalDate expirationDate, String nationality, String gender,
+                                      String fixtureLabel, String scenarioTag) {
+    }
+
+    public record TestIdentityView(UUID identityReferenceId, String firstName, String familyName,
+                                   String maskedNationalId, LocalDate birthDate, String nationality,
+                                   LocalDate expirationDate, String photoVersion, Long photoSize,
+                                   String biometricStatus, String lifecycleState, String fixtureLabel,
+                                   String scenarioTag, Instant createdAt, Instant updatedAt) {
+    }
+
+    public record Photo(String contentType, byte[] bytes) {
+    }
 }
