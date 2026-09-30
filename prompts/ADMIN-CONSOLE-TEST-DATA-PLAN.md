@@ -4,6 +4,8 @@
 
 Add a dedicated Development/Test Identity Data section to the Admin Console so developers and testers can create, edit, inspect, replace and retire synthetic/test identity-reference records without depending on an external identity provider.
 
+The capability must work with the current persistence architecture: file-backed H2 in the `dev` profile, Oracle in `local`/`oracle` profiles, and optional Redis as an acceleration layer. Redis must not be required for fixture correctness, and no local in-memory cache fallback should be introduced.
+
 The feature is intended for environments where a real provider is unavailable, unreachable, unsuitable for automated testing, or where deterministic test identities are required.
 
 The uploaded/admin-console PDF remains the visual reference. The new page must use the same dark brown / near-black shell, amber/orange accents, compact enterprise cards, status chips, left-side navigation and form/table conventions.
@@ -281,17 +283,18 @@ Avoid storing unlimited historical images without a policy.
 
 ---
 
-## 11. Oracle persistence
+## 11. Active database persistence
 
-Oracle should be the durable source of truth for these test identities.
+The active durable database is the source of truth for these test identities. In the current architecture this means **file-backed H2 in the `dev` profile** and **Oracle in `local`/`oracle` profiles**. Redis, when enabled, is only an acceleration/cache layer.
 
 The implementation must:
-- persist identity metadata in Oracle
-- persist the reference photo using the project's selected Oracle representation
+- persist identity metadata in the active durable database
+- persist the reference photo using the active database's supported representation (H2-compatible development representation and Oracle representation in Oracle profiles)
 - persist biometric-reference metadata/vector through the existing biometric persistence design where enabled
 - participate in existing lifecycle/state handling
-- survive service restart
+- survive service restart in both H2 development and Oracle deployments
 - be queryable through the normal identity-reference lookup path
+- work with Redis disabled; when Redis is enabled, cache population/invalidation must remain secondary to durable persistence
 
 The implementation must inspect the current Oracle schema before adding tables/columns.
 
@@ -299,7 +302,7 @@ Prefer reusing existing identity-reference and biometric tables when their model
 
 If a dedicated fixture metadata table is necessary, it must reference the canonical identity-reference record rather than duplicate the whole customer record.
 
-Do not make Redis or browser storage the authoritative source.
+Do not make Redis, browser storage, or any local in-memory cache the authoritative source.
 
 ---
 
@@ -323,16 +326,18 @@ Any environment-specific filtering must be explicit and documented.
 
 ## 13. Provider-independent operation
 
-This capability solves an important development problem: a developer should be able to run the identity-reference service with Oracle and the test-data feature even when no external provider is available.
+This capability solves an important development problem: a developer should be able to run the identity-reference service with the file-backed H2 `dev` profile or Oracle and the test-data feature even when no external provider is available.
 
 Therefore the implementation should support:
-- Oracle enabled
+- active database enabled (`dev` H2 file or `local`/`oracle` Oracle)
 - provider integrations disabled/unavailable
 - test fixture source enabled
 - normal lookup against Oracle
 - biometric reference integration available according to configuration
 
 Do not require a live national/provider integration to create or use test identities.
+
+The feature must remain fully functional with `IDENTITY_REDIS_ENABLED=false`. If Redis is enabled, it may accelerate reads but must never become a prerequisite for create/update/retire or normal lookup.
 
 This should be documented as a supported development/test operating mode.
 
@@ -612,7 +617,7 @@ Do not place real customer data in documentation, examples, fixtures or source c
 ## 24. Implementation constraints
 
 Before implementation:
-1. Inspect current main.
+1. Inspect the requested current branch/base state.
 2. Inspect the current domain model and Oracle schema/migrations.
 3. Inspect the current biometric ingestion/reference implementation.
 4. Inspect the current Admin Console V2 plan.
@@ -620,8 +625,8 @@ Before implementation:
 6. Reuse existing lifecycle, audit, cache and biometric services.
 7. Do not overwrite real values in application-local.yml.
 8. Do not create a second source of truth for identity data.
-9. Do not implement real cryptographic protection early; remain compatible with Phase 21.
-10. Do not merge the old feature/admin-console-v1 branch wholesale.
+11. Do not implement real cryptographic protection early; remain compatible with Phase 21.
+12. Do not merge the old feature/admin-console-v1 branch wholesale.
 
 Use forward-only Oracle migrations and preserve existing data.
 
@@ -696,7 +701,7 @@ The feature is complete only when:
 - [ ] The section has its own enable/disable configuration.
 - [ ] Test-data endpoints are disabled server-side outside permitted DEV/TEST environments.
 - [ ] Production/pro cannot anonymously create or modify fixture data.
-- [ ] Test identities are stored durably in Oracle.
+- [ ] Test identities are stored durably in the active database: H2 file in `dev`, Oracle in `local`/`oracle`.
 - [ ] Test identities use the canonical identity-reference domain rather than a parallel customer table unless a justified fixture metadata table is required.
 - [ ] The form supports required identity fields.
 - [ ] National ID handling follows the existing privacy model and remains compatible with Phase 21.
@@ -711,6 +716,7 @@ The feature is complete only when:
 - [ ] Test fixtures are usable through the normal lookup/reference path.
 - [ ] Retirement integrates with existing governance/cache/audit behavior.
 - [ ] Administrative operations are audited without raw PII/photo/vector data.
+- [ ] The feature works with Redis disabled and does not introduce a local in-memory cache dependency.
 - [ ] Raw embedding vectors are not shown in the normal UI.
 - [ ] Contextual help exists.
 - [ ] Help Center documentation exists.
@@ -725,6 +731,7 @@ This plan is intentionally separate from the canonical numbered phases.
 
 It should be implemented as an Admin Console capability and coordinated with:
 - prompts/ADMIN-CONSOLE-V2-PLAN.md
+- H2 development database and optional Redis architecture
 - Phase 18 biometric integration
 - Phase 18.5 storage/schema and cache architecture
 - Phase 19 automated/E2E validation
