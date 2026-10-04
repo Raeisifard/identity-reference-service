@@ -25,6 +25,22 @@ class ApiSecurityConfigurationTest {
     }
 
     @Test
+    void defaultDevProfileNeverRequiresCredentialsWhenNoActiveProfileIsSelected() {
+        var environment = new MockEnvironment();
+        environment.setDefaultProfiles("dev");
+
+        var api = new ApiSecurityProperties();
+        api.setEnabled(true);
+        var console = new AdminConsoleProperties();
+        console.setEnabled(true);
+        console.getAuthentication().setEnabled(true);
+
+        var service = new ApiSecurityConfiguration().apiUsers(api, console, environment);
+
+        assertThat(service).isNotNull();
+    }
+
+    @Test
     void protectedProfileRequiresCredentialsWhenSecurityIsEnabled() {
         var environment = new MockEnvironment();
         environment.setActiveProfiles("local");
@@ -41,7 +57,8 @@ class ApiSecurityConfigurationTest {
 
     @Test
     void protectedProfileCanStartWithAdminCredentials() {
-        var environment = new MockEnvironment().withProperty("spring.profiles.active", "local");
+        var environment = new MockEnvironment();
+        environment.setActiveProfiles("local");
         var api = new ApiSecurityProperties();
         api.setEnabled(true);
         api.setAdminUsername("admin");
