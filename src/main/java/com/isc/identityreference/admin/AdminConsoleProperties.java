@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,6 +45,14 @@ public class AdminConsoleProperties {
 @Configuration(proxyBeanMethods=false)
 @EnableConfigurationProperties(AdminConsoleProperties.class)
 class AdminConsoleConfiguration{
+    @org.springframework.context.annotation.Bean
+    WebMvcConfigurer adminConsoleResources(AdminConsoleProperties p){
+        return new WebMvcConfigurer(){
+            @Override public void addResourceHandlers(ResourceHandlerRegistry registry){
+                registry.addResourceHandler(p.getPath()+"/**").addResourceLocations("classpath:/static/admin-console/");
+            }
+        };
+    }
     @org.springframework.context.annotation.Bean
     Object validateAdminConsole(AdminConsoleProperties p){
         if (p.getPath() == null || p.getPath().isBlank() || !p.getPath().startsWith("/")) {
