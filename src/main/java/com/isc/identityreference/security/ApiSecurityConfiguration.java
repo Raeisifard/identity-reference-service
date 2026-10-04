@@ -77,8 +77,6 @@ public class ApiSecurityConfiguration {
                         auth.requestMatchers(
                                 console.getPath(),
                                 console.getPath() + "/**",
-                                console.getPath(),
-                                console.getPath() + "/**",
                                 "/admin-console/**",
                                 "/api/v1/admin/test-data/**",
                                 "/api/v1/admin/console/**"
