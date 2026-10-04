@@ -122,7 +122,7 @@ public class ApiSecurityConfiguration {
             AdminConsoleProperties console,
             Environment environment
     ) {
-        boolean development = environment.matchesProfiles("dev");
+        boolean development = isDevelopmentProfile(environment);
         boolean required =
                 !development && (properties.isEnabled()
                         || (console.isEnabled()
