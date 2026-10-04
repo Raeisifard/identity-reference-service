@@ -177,6 +177,8 @@ public class TestIdentityFixtureService {
         if (r == null || blank(r.firstName()) || blank(r.familyName()) || blank(r.nationalId()))
             throw new IllegalArgumentException("First name, family name and national ID are required");
         if (r.birthDate() == null) throw new IllegalArgumentException("Birth date is required");
+        if (blank(r.scenarioTag()) || !TestScenarioCatalog.isKnown(r.scenarioTag()))
+            throw new IllegalArgumentException("Scenario tag must be selected from the known test scenario catalog");
         if (r.expirationDate() != null && r.expirationDate().isBefore(r.birthDate()))
             throw new IllegalArgumentException("Expiration date must not precede birth date");
     }
