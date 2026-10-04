@@ -35,6 +35,9 @@ spring:
 logging:
   config: classpath:log4j2-spring.xml
 identity-reference:
+  api:
+    security:
+      enabled: false
   persistence:
     h2:
       enabled: true
