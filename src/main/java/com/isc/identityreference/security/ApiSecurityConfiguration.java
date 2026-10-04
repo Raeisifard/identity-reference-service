@@ -112,10 +112,12 @@ public class ApiSecurityConfiguration {
     @Bean
     UserDetailsService apiUsers(
             ApiSecurityProperties properties,
-            AdminConsoleProperties console
+            AdminConsoleProperties console,
+            Environment environment
     ) {
+        boolean development = environment.matchesProfiles("dev");
         boolean required =
-                properties.isEnabled()
+                !development && (properties.isEnabled()
                         || (console.isEnabled()
                         && console.getAuthentication().isEnabled());
 
