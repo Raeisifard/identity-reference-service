@@ -60,7 +60,12 @@ class AdminConsoleConfiguration{
 }
 @Controller
 @ConditionalOnProperty(prefix="identity-reference.admin-console",name="enabled",havingValue="true",matchIfMissing=true)
-class AdminConsoleController{@GetMapping({"/admin-console","/admin-console/"})String index(){return "redirect:/admin-console/index.html";}}
+class AdminConsoleController{
+    private final AdminConsoleProperties properties;
+    AdminConsoleController(AdminConsoleProperties properties){this.properties=properties;}
+    @GetMapping({"/admin-console","/admin-console/"}) String legacyIndex(){return "redirect:"+properties.getPath()+"/index.html";}
+    @GetMapping({"${identity-reference.admin-console.path:/admin-console}","${identity-reference.admin-console.path:/admin-console}/"}) String configuredIndex(){return "redirect:"+properties.getPath()+"/index.html";}
+}
 @RestController
 @RequestMapping("/api/v1/admin/console")
 @ConditionalOnProperty(prefix="identity-reference.admin-console",name="enabled",havingValue="true",matchIfMissing=true)
