@@ -21,6 +21,13 @@ identity-reference:
   cache:
     redis:
       enabled: false
+  api:
+    security:
+      enabled: true
+      lookup-username: test-lookup
+      lookup-password: test-lookup-secret
+      admin-username: test-admin
+      admin-password: test-admin-secret
   provider:
     real-integrations-enabled: false
     adapters:
