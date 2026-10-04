@@ -11,7 +11,8 @@ class ApiSecurityConfigurationTest {
 
     @Test
     void devProfileNeverRequiresApiOrConsoleCredentials() {
-        var environment = new MockEnvironment().withProperty("spring.profiles.active", "dev");
+        var environment = new MockEnvironment();
+        environment.setActiveProfiles("dev");
         var api = new ApiSecurityProperties();
         api.setEnabled(true);
         var console = new AdminConsoleProperties();
@@ -25,7 +26,8 @@ class ApiSecurityConfigurationTest {
 
     @Test
     void protectedProfileRequiresCredentialsWhenSecurityIsEnabled() {
-        var environment = new MockEnvironment().withProperty("spring.profiles.active", "local");
+        var environment = new MockEnvironment();
+        environment.setActiveProfiles("local");
         var api = new ApiSecurityProperties();
         api.setEnabled(true);
         var console = new AdminConsoleProperties();
