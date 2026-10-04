@@ -23,7 +23,7 @@ system:["System","Combines application health, runtime/browser information and c
 help:["Help Center","Detailed documentation for operating the Identity Reference Service Admin Console.","Use the section index, architecture, operations, security, API guide and glossary below. Each operational page also has contextual help through the ? button.","Documentation describes current behavior only; future phases are explicitly identified as future."]
 };
 async function api(u,o={}){const r=await fetch(u,o);if(!r.ok){let m=await r.text();try{m=JSON.parse(m).message||m}catch{}throw new Error(m||String(r.status))}return r.status===204?null:r.json()}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;","'":"&#39;"}[c]))}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
 function toast(m){const t=document.getElementById("toast");t.textContent=m;t.style.display="block";clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display="none",3500)}
 function openModal(title,body){document.getElementById("modalBody").innerHTML="<h2>"+esc(title)+"</h2>"+body;document.getElementById("modal").setAttribute("aria-hidden","false");document.getElementById("modal").classList.add("open")}
 function closeModal(){document.getElementById("modal").classList.remove("open");document.getElementById("modal").setAttribute("aria-hidden","true")}
