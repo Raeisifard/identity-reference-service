@@ -159,19 +159,17 @@ public class ApiSecurityConfiguration {
     }
 
     private static boolean isDevelopmentProfile(Environment environment) {
-        // Do not rely on Environment.matchesProfiles()/getDefaultProfiles()
-        // here. Maven test contexts and Spring's profile processing can expose
-        // the default profile differently from a running application.
-        //
-        // This application explicitly declares "dev" as spring.profiles.default,
-        // so with no explicitly selected profile it must be treated as dev.
-        String active = environment.getProperty("spring.profiles.active");
-        if (active != null && !active.isBlank()) {
-            return java.util.Arrays.stream(active.split(","))
-                    .map(String::trim)
+        // Explicitly active profiles always take precedence over the default
+        // profile. This is important for tests and for protected local/oracle
+        // deployments: @ActiveProfiles("test") must not inherit dev behavior.
+        String[] activeProfiles = environment.getActiveProfiles();
+        if (activeProfiles.length > 0) {
+            return java.util.Arrays.stream(activeProfiles)
                     .anyMatch("dev"::equals);
         }
 
+        // When nothing is explicitly active, this application deliberately
+        // treats spring.profiles.default=dev as development mode.
         String defaultProfiles = environment.getProperty("spring.profiles.default", "");
         return java.util.Arrays.stream(defaultProfiles.split(","))
                 .map(String::trim)
