@@ -45,9 +45,16 @@ public class AdminConsoleProperties {
 class AdminConsoleConfiguration{
     @org.springframework.context.annotation.Bean
     Object validateAdminConsole(AdminConsoleProperties p){
+        if (p.getPath() == null || p.getPath().isBlank() || !p.getPath().startsWith("/")) {
+            throw new IllegalStateException("Admin console path must start with '/'");
+        }
+        if (p.getPath().length() > 1 && p.getPath().endsWith("/")) {
+            throw new IllegalStateException("Admin console path must not end with '/'");
+        }
         if(p.isEnabled()&&!p.isDevelopmentMode()&&p.getSections().isTestData())throw new IllegalStateException("Test-data console is DEV/TEST only");
         if(p.isEnabled()&&p.getAuthentication().isEnabled()&&p.getAuthentication().getSessionTimeoutMinutes()<=0)throw new IllegalStateException("Admin console session timeout must be positive");
         if(p.getTestData().getMaxPhotoBytes()<=0||p.getTestData().getMaxPhotoWidth()<=0||p.getTestData().getMaxPhotoHeight()<=0)throw new IllegalStateException("Photo limits must be positive");
+        if (p.getTestData().getAllowedContentTypes() == null || p.getTestData().getAllowedContentTypes().length == 0) throw new IllegalStateException("At least one photo content type must be configured");
         return new Object();
     }
 }
@@ -61,6 +68,9 @@ class AdminConsoleRuntimeController{
     private final AdminConsoleProperties p; AdminConsoleRuntimeController(AdminConsoleProperties p){this.p=p;}
     @GetMapping("/config") Map<String,Object> config(){
         var r=new LinkedHashMap<String,Object>();r.put("title",p.getTitle());r.put("developmentMode",p.isDevelopmentMode());r.put("authenticationEnabled",p.getAuthentication().isEnabled());r.put("helpCenterEnabled",p.getHelpCenter().isEnabled());
-        var s=p.getSections();var m=new LinkedHashMap<String,Boolean>();m.put("dashboard",s.isDashboard());m.put("monitoring",s.isMonitoring());m.put("providers",s.isProviders());m.put("cache",s.isCache());m.put("refresh",s.isRefresh());m.put("lookup",s.isLookup());m.put("administration",s.isAdministration());m.put("biometric",s.isBiometric());m.put("test-data",s.isTestData());m.put("api-testing",s.isApiTesting());m.put("governance",s.isGovernance());m.put("audit",s.isAudit());m.put("security",s.isSecurity());m.put("system",s.isSystem());m.put("help",s.isHelp());r.put("sections",m);return r;
+        r.put("path",p.getPath());
+        r.put("loginPageEnabled",p.getAuthentication().isLoginPageEnabled());
+        r.put("sessionTimeoutMinutes",p.getAuthentication().getSessionTimeoutMinutes());
+        var s=p.getSections();var m=new LinkedHashMap<String,Boolean>();m.put("dashboard",s.isDashboard());m.put("monitoring",s.isMonitoring());m.put("providers",s.isProviders());m.put("cache",s.isCache());m.put("refresh",s.isRefresh());m.put("lookup",s.isLookup());m.put("administration",s.isAdministration());m.put("biometric",s.isBiometric());m.put("test-data",s.isTestData());m.put("api-testing",s.isApiTesting());m.put("governance",s.isGovernance());m.put("audit",s.isAudit());m.put("security",s.isSecurity());m.put("system",s.isSystem());m.put("help",s.isHelp() && p.getHelpCenter().isEnabled());r.put("sections",m);return r;
     }
 }
