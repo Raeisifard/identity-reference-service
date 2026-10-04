@@ -83,6 +83,8 @@ public class ApiSecurityConfiguration {
                         ).hasRole("ADMIN");
                     } else {
                         auth.requestMatchers(
+                                console.getPath(),
+                                console.getPath() + "/**",
                                 "/admin-console/**",
                                 "/api/v1/admin/test-data/**",
                                 "/api/v1/admin/console/**"
