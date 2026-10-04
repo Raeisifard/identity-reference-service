@@ -122,7 +122,7 @@ public class ApiSecurityConfiguration {
         boolean required =
                 !development && (properties.isEnabled()
                         || (console.isEnabled()
-                        && console.getAuthentication().isEnabled());
+                        && console.getAuthentication().isEnabled()));
 
         if (!required) {
             return new InMemoryUserDetailsManager(List.of());
