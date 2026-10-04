@@ -105,6 +105,9 @@ public class ApiSecurityConfiguration {
         if (apiProtected || consoleProtected) {
             http.httpBasic(basic -> {});
         }
+        if (consoleProtected && console.getAuthentication().isLoginPageEnabled()) {
+            http.formLogin(form -> form.defaultSuccessUrl(console.getPath(), true));
+        }
 
         return http.build();
     }
