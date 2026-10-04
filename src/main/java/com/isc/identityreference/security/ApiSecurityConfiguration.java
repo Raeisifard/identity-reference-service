@@ -168,11 +168,9 @@ public class ApiSecurityConfiguration {
                     .anyMatch("dev"::equals);
         }
 
-        // When nothing is explicitly active, this application deliberately
-        // treats spring.profiles.default=dev as development mode.
-        String defaultProfiles = environment.getProperty("spring.profiles.default", "");
-        return java.util.Arrays.stream(defaultProfiles.split(","))
-                .map(String::trim)
+        // When nothing is explicitly active, use Spring's resolved default profiles.
+        // This also matches tests that configure the Environment directly.
+        return java.util.Arrays.stream(environment.getDefaultProfiles())
                 .anyMatch("dev"::equals);
     }
 
