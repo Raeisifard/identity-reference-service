@@ -106,7 +106,11 @@ public class ApiSecurityConfiguration {
             http.httpBasic(basic -> {});
         }
         if (consoleProtected && console.getAuthentication().isLoginPageEnabled()) {
-            http.formLogin(form -> form.defaultSuccessUrl(console.getPath(), true));
+            http.formLogin(form -> form.successHandler((request, response, authentication) -> {
+                var session = request.getSession(true);
+                session.setMaxInactiveInterval((int) (console.getAuthentication().getSessionTimeoutMinutes() * 60));
+                response.sendRedirect(console.getPath());
+            }));
         }
 
         return http.build();
