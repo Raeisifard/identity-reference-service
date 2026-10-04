@@ -38,9 +38,10 @@ public class ApiSecurityConfiguration {
     ) throws Exception {
 
         boolean development = environment.matchesProfiles("dev");
-        boolean apiProtected = properties.isEnabled();
+        boolean apiProtected = !development && properties.isEnabled();
         boolean consoleProtected =
-                console.isEnabled()
+                !development
+                        && console.isEnabled()
                         && console.getAuthentication().isEnabled();
 
         http
@@ -74,6 +75,10 @@ public class ApiSecurityConfiguration {
 
                     if (consoleProtected) {
                         auth.requestMatchers(
+                                console.getPath(),
+                                console.getPath() + "/**",
+                                console.getPath(),
+                                console.getPath() + "/**",
                                 "/admin-console/**",
                                 "/api/v1/admin/test-data/**",
                                 "/api/v1/admin/console/**"
