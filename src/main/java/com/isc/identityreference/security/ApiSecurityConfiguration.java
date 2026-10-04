@@ -37,7 +37,7 @@ public class ApiSecurityConfiguration {
             Environment environment
     ) throws Exception {
 
-        boolean development = environment.matchesProfiles("dev");
+        boolean development = isDevelopmentProfile(environment);
         boolean apiProtected = !development && properties.isEnabled();
         boolean consoleProtected =
                 !development
@@ -156,6 +156,23 @@ public class ApiSecurityConfiguration {
         }
 
         return new InMemoryUserDetailsManager(users);
+    }
+
+    private static boolean isDevelopmentProfile(Environment environment) {
+        // Spring's default profile is not returned by getActiveProfiles().
+        // This application deliberately uses "dev" as its default profile, so
+        // a process started without -Dspring.profiles.active must still behave
+        // as development. An explicitly selected profile (for example local)
+        // takes precedence over the default profile.
+        for (String profile : environment.getActiveProfiles()) {
+            if ("dev".equals(profile)) {
+                return true;
+            }
+        }
+
+        return environment.getActiveProfiles().length == 0
+                && java.util.Arrays.stream(environment.getDefaultProfiles())
+                .anyMatch("dev"::equals);
     }
 
     private static void addUser(
