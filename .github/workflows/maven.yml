@@ -10,7 +10,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/admin-console-v2-test-data-plans" ]
   pull_request:
     branches: [ "main" ]
 
