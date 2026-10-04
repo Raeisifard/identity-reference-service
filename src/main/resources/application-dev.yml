@@ -45,3 +45,13 @@ identity-reference:
       enabled: ${IDENTITY_REDIS_ENABLED:false}
       key-prefix: "${IDENTITY_REDIS_KEY_PREFIX:identity-ref:v1:}"
       entry-ttl: ${IDENTITY_REDIS_ENTRY_TTL:24h}
+
+  admin-console:
+    enabled: true
+    development-mode: true
+    authentication:
+      enabled: false
+      login-page-enabled: false
+    sections:
+      test-data: true
+      api-testing: true
