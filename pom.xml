@@ -95,6 +95,24 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <configuration>
+                    <!--
+                        Keep Maven Flyway operations aligned with the development H2
+                        database. Flyway scans locations recursively, so the default
+                        classpath:db/migration would discover both the Oracle migrations
+                        and the H2 copies and report duplicate versions.
+
+                        Override this with -Dflyway.locations=classpath:db/migration
+                        when running Flyway against Oracle.
+                    -->
+                    <locations>
+                        <location>classpath:db/migration/h2</location>
+                    </locations>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
